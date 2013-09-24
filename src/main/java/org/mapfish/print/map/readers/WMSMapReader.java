@@ -73,11 +73,11 @@ public class WMSMapReader extends TileableMapReader {
 					filter = customParams.optString("CQL_FILTER");
 				}				
 				if(filter == null) {
-					filter = "";
+					filter = "INCLUDE";
 				}
 				return filter;
 			}
-			return "";
+			return "INCLUDE";
 		}
     	
     }
@@ -170,7 +170,7 @@ public class WMSMapReader extends TileableMapReader {
 
     private boolean hasFilter() {    	
 		for(String filter : filters) {
-			if(!filter.trim().isEmpty()) {
+			if(!filter.trim().isEmpty() && !filter.trim().equalsIgnoreCase("INCLUDE")) {
 				return true;
 			}
 		}

@@ -96,6 +96,26 @@ public class WMSMapReaderTest extends MapTestBasic {
         assertEquals(2, cqlFilter.split(";").length);          
     }
     
+    public void testMergeDifferentFiltersWithEmptyOne() throws JSONException, UnsupportedEncodingException, URISyntaxException{
+
+    	PJsonObject wms_full_1 = new PJsonObject(wmsSpec1.getInternalObj(), "");    	
+    	WMSMapReader wmsreader1 = getMapReader(wms_full_1);                
+        
+        PJsonObject wms_full_2 = new PJsonObject(wmsSpec4.getInternalObj(), "");    	
+        WMSMapReader wmsreader2 = getMapReader(wms_full_2);
+        
+        assertTrue(wmsreader1.canMerge(wmsreader2));
+        wmsreader1.testMerge(wmsreader2);
+        assertEquals(2, wmsreader1.layers.size());        
+        wmsreader1.render(transformer, null, "EPSG:4326", false);
+        List<URI> tiles = TestTileRenderer.lastURIs;
+        assertTrue(tiles.size() > 0);
+        String queryString = tiles.get(0).getRawQuery();
+        String cqlFilter = getQueryParam(queryString, "CQL_FILTER");
+        assertEquals(2, cqlFilter.split(";").length); 
+        assertTrue(cqlFilter.indexOf("INCLUDE")>=0);
+    }
+    
     public void testFilter() throws JSONException, UnsupportedEncodingException, URISyntaxException{
 
     	PJsonObject wms_full = new PJsonObject(wmsSpec1.getInternalObj(), "");
