@@ -62,29 +62,30 @@ public class ImageBlock extends Block {
 
 	public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
         final URI url;
-        try {
-            try{
-            	// we're going to try obtain an svg image appended as content in images param
-            	if(name != null && params.has("images")){
-            		PJsonObject images = params.getJSONObject("images");
-                    if(images != null && images.has(name)) {
-                    	PJsonObject image = images.getJSONObject(name);
-                		svgContent = image.getString("content");
-                    }
-            	}
-            }catch(JsonMissingException jme){
-            	// nothing. we execute the default render
-            	svgContent = null;
-            }
-            final String urlTxt = PDFUtils.evalString(context, params, this.url);
-            url = new URI(urlTxt);
-        } catch (URISyntaxException e) {
-            throw new InvalidValueException("url", this.url, e);
+        try{
+        	// we're going to try obtain an svg image appended as content in images param
+        	if(name != null && params.has("images")){
+        		PJsonObject images = params.getJSONObject("images");
+                if(images != null && images.has(name)) {
+                	PJsonObject image = images.getJSONObject(name);
+            		svgContent = image.getString("content");
+                }
+        	}
+        }catch(JsonMissingException jme){
+        	// nothing. we execute the default render
+        	svgContent = null;
         }
         if(svgContent != null){
         	// we render the image content
             drawSVG(context, params, target, svgContent);
         }else{
+        	// download from an url
+            try {
+                final String urlTxt = PDFUtils.evalString(context, params, this.url);
+                url = new URI(urlTxt);
+            } catch (URISyntaxException e) {
+                throw new InvalidValueException("url", this.url, e);
+            }
         	if (url.getPath().endsWith(".svg")) {
                 drawSVG(context, params, target, url);
             } else {

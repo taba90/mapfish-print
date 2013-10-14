@@ -39,7 +39,9 @@ public class Layout {
 
     private MainPage mainPage;
 
-    private LastPage lastPage;
+    private DynamicImagesPage dynamicImagesPage;
+
+	private LastPage lastPage;
 
     private String outputFilename;
 
@@ -51,6 +53,12 @@ public class Layout {
         if (titlePage != null) {
             titlePage.render(params, context);
         }
+        
+		if (dynamicImagesPage != null
+				&& DynamicImagesPage.BEFORE_MAIN_PAGE.equals(dynamicImagesPage
+						.getRenderOn())){
+			dynamicImagesPage.render(params, context);
+		}
 
         if (mainPage != null) {
             PJsonArray pages = params.getJSONArray("pages");
@@ -59,10 +67,22 @@ public class Layout {
                 mainPage.render(cur, context);
             }
         }
+        
+		if (dynamicImagesPage != null
+				&& DynamicImagesPage.BEFORE_LAST_PAGE.equals(dynamicImagesPage
+						.getRenderOn())){
+			dynamicImagesPage.render(params, context);
+		}
 
         if (lastPage != null) {
             lastPage.render(params, context);
         }
+        
+		if (dynamicImagesPage != null
+				&& DynamicImagesPage.AFTER_LAST_PAGE.equals(dynamicImagesPage
+						.getRenderOn())){
+			dynamicImagesPage.render(params, context);
+		}
     }
 
     public void setTitlePage(TitlePage titlePage) {
@@ -84,6 +104,14 @@ public class Layout {
     public void setMetaData(MetaData metaData) {
         this.metaData = metaData;
     }
+
+    public DynamicImagesPage getDynamicImagesPage() {
+		return dynamicImagesPage;
+	}
+
+	public void setDynamicImagesPage(DynamicImagesPage dynamicImagesPage) {
+		this.dynamicImagesPage = dynamicImagesPage;
+	}
 
     public Rectangle getFirstPageSize(RenderingContext context, PJsonObject params) {
         if (titlePage != null) {
