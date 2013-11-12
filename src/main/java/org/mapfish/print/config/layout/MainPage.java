@@ -19,10 +19,13 @@
 
 package org.mapfish.print.config.layout;
 
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.config.layout.Page.Position;
 import org.mapfish.print.utils.PJsonObject;
 
 import com.lowagie.text.DocumentException;
@@ -49,11 +52,15 @@ public class MainPage extends Page {
 
         json.key("rotation").value(rotation);
     }
+    
+    protected Position getCurrentPosition() {
+		return Position.MAIN_PAGE;
+	}
 
     /**
      * Called for each map requested by the client.
      */
-    public void render(PJsonObject params, RenderingContext context) throws DocumentException {
+    public void render(PJsonObject params, RenderingContext context, List<ExtraPage> extraPages) throws DocumentException {
         //validate the rotation parameter
         final float rotation = params.optFloat("rotation", 0.0F);
         if (rotation != 0.0F && !this.rotation) {

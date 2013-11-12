@@ -19,6 +19,8 @@
 
 package org.mapfish.print.config.layout;
 
+import org.mapfish.print.config.layout.Page.Position;
+
 /**
  * Bean to configure the static page added at the end of the document.
  * It's "lastPage" in in the layout definition.
@@ -26,5 +28,7 @@ package org.mapfish.print.config.layout;
  * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#ServersideConfiguration
  */
 public class LastPage extends Page {
-
+	protected Position getCurrentPosition() {
+		return Position.LAST_PAGE;
+	}
 }

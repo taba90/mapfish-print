@@ -30,6 +30,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -103,7 +104,15 @@ public class LegendsBlock extends Block {
     private boolean dontBreakItems = false;
 
     private boolean reorderColumns = false;
+    
+    private boolean overflow = false;
+    
+    private List<PdfPTable> extraColumns = new ArrayList<PdfPTable>();
 
+    public boolean hasExtraRendering() {
+		return extraColumns.size() > 0;
+	}
+    
     /**
      * Render the legends block
      * @see org.mapfish.print.config.layout.Block#render(
@@ -168,7 +177,7 @@ public class LegendsBlock extends Block {
             columns.add(column);
             this.context = context;
             PJsonArray legends = context.getGlobalParams().optJSONArray("legends");
-            if (legends == null || legends.size() == 0) {
+            if (legends == null || legends.size() == 0 || (overflow && hasExtraRendering())) {
                 // this prevents a bug when there are no legends
                 needTempDocument = false;
             }
@@ -180,38 +189,55 @@ public class LegendsBlock extends Block {
         public void render(PdfElement target) throws DocumentException {
             //float optimumTextWidthWithoutIcon = 0f;
             int numColumns = 1;
-            absoluteWidths = new float[1];
-
-            // create the legend
-            PJsonArray legends = context.getGlobalParams().optJSONArray("legends");
-            float maxColumnWidth = maxWidth;
-
-            if (legends != null && legends.size() > 0) {
-                for (int i = 0; i < legends.size(); ++i) {
-                	try {
-                		createLegend(legends.getJSONObject(i), i == 0);
-                	} catch(org.mapfish.print.InvalidValueException e) {
-                		if(failOnBrokenUrl) {
-	                		throw e;
-                		} else {
-                			// error getting legend icon
-	                		// we don't fail, we simply skip this item
-	                		LOGGER.warn("Error getting legend item " + legends.getJSONObject(i).getString("name"), e);
-                		}
-                	}
-                }
-                setOptimumCellWidths(maxColumnWidth);
-                setOptimumColumns(maxColumnWidth, reorderColumns); 
+            boolean overflowDone = false;
+            if(overflow && hasExtraRendering()) {
+            	int extraColumnsUsed = extraColumns.size() > maxColumns ? maxColumns : extraColumns.size();
+            	columns.clear();
+            	for(int count = 0; count < extraColumnsUsed; count++) {
+            		columns.add(extraColumns.remove(0));
+            	}
+            	overflowDone = true;
+            } else {
+	            absoluteWidths = new float[1];
+	
+	            // create the legend
+	            PJsonArray legends = context.getGlobalParams().optJSONArray("legends");
+	            float maxColumnWidth = maxWidth;
+	
+	            if (legends != null && legends.size() > 0) {
+	                for (int i = 0; i < legends.size(); ++i) {
+	                	try {
+	                		createLegend(legends.getJSONObject(i), i == 0);
+	                	} catch(org.mapfish.print.InvalidValueException e) {
+	                		if(failOnBrokenUrl) {
+		                		throw e;
+	                		} else {
+	                			// error getting legend icon
+		                		// we don't fail, we simply skip this item
+		                		LOGGER.warn("Error getting legend item " + legends.getJSONObject(i).getString("name"), e);
+	                		}
+	                	}
+	                }
+	                setOptimumCellWidths(maxColumnWidth);
+	                setOptimumColumns(maxColumnWidth, reorderColumns); 
+	            }
             }
 
             numColumns = columns.size();
             
-            PdfPTable table = getDefaultOuterTable(numColumns > maxColumns ? maxColumns : numColumns);
+            int finalTableColumns = numColumns > maxColumns ? maxColumns : numColumns;
+			PdfPTable table = getDefaultOuterTable(finalTableColumns);
             if (maxWidth != Float.MAX_VALUE) {
                 table.setTotalWidth(maxWidth);
             }
-            
-            for (PdfPTable col : columns) {
+            if(overflow && columns.size() > finalTableColumns && !overflowDone) {
+            	for(int count=finalTableColumns; count < columns.size(); count++) {
+            		extraColumns.add(columns.get(count));
+            	}
+            	columns.removeAll(extraColumns);
+            	context.getExtraPages().add(ExtraPage.createAfter(context.getCurrentPosition(), LegendsBlock.this));
+            }
+            for (PdfPTable col : columns) {            	
                 PdfPCell cell = new PdfPCell(col);
                 cell.setPaddingTop(columnPadding[0]);
                 cell.setPaddingRight(columnPadding[1]);
@@ -257,7 +283,9 @@ public class LegendsBlock extends Block {
             } else {
             	target.add(table);
             }
-            cleanup(); // don't forget to cleanup afterwards
+            if(!overflowDone) {
+            	cleanup(); // don't forget to cleanup afterwards
+            }
         }
         
         /**
@@ -985,7 +1013,14 @@ public class LegendsBlock extends Block {
         }
     }
 
-    
+    /**
+     * Sets the overflow behavious: if true legends flow to next pages.
+     * 
+     * @param overflow
+     */
+    public void setOverflow(boolean overflow) {
+    	this.overflow = overflow;
+    }
     
     /**
      * Decides if the renderer fail if broken image is received (defaults to true).

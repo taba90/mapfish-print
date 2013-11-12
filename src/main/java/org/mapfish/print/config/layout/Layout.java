@@ -19,6 +19,9 @@
 
 package org.mapfish.print.config.layout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.InvalidValueException;
@@ -42,7 +45,7 @@ public class Layout {
     private DynamicImagesPage dynamicImagesPage;
 
 	private LastPage lastPage;
-
+	
     private String outputFilename;
 
     public void render(PJsonObject params, RenderingContext context) throws DocumentException {
@@ -53,13 +56,8 @@ public class Layout {
         if (titlePage != null) {
             titlePage.render(params, context);
         }
-        
-		if (dynamicImagesPage != null
-				&& DynamicImagesPage.BEFORE_MAIN_PAGE.equals(dynamicImagesPage
-						.getRenderOn())){
-			dynamicImagesPage.render(params, context);
-		}
-
+        renderExtraPages(ExtraPage.BEFORE_MAIN_PAGE, params, context);
+		
         if (mainPage != null) {
             PJsonArray pages = params.getJSONArray("pages");
             for (int i = 0; i < pages.size(); ++i) {
@@ -68,24 +66,32 @@ public class Layout {
             }
         }
         
-		if (dynamicImagesPage != null
-				&& DynamicImagesPage.BEFORE_LAST_PAGE.equals(dynamicImagesPage
-						.getRenderOn())){
-			dynamicImagesPage.render(params, context);
-		}
-
+        renderExtraPages(ExtraPage.BEFORE_LAST_PAGE, params, context);
+		
         if (lastPage != null) {
             lastPage.render(params, context);
         }
         
-		if (dynamicImagesPage != null
-				&& DynamicImagesPage.AFTER_LAST_PAGE.equals(dynamicImagesPage
-						.getRenderOn())){
-			dynamicImagesPage.render(params, context);
-		}
+        renderExtraPages(ExtraPage.AFTER_LAST_PAGE, params, context);
+		
     }
 
-    public void setTitlePage(TitlePage titlePage) {
+	private void renderExtraPages(String position, PJsonObject params,
+			RenderingContext context) throws DocumentException {
+		for (ExtraPage extraPage : context.getExtraPages()) {
+			if (position.equals(extraPage.getRenderOn())) {
+				extraPage.render(params, context);
+			}
+		}
+		// deprecated: please, use extra pages
+		if(dynamicImagesPage != null) {
+			if (position.equals(dynamicImagesPage.getRenderOn())) {
+				dynamicImagesPage.render(params, context);
+			}
+		}
+	}
+
+	public void setTitlePage(TitlePage titlePage) {
         this.titlePage = titlePage;
     }
 
@@ -105,10 +111,21 @@ public class Layout {
         this.metaData = metaData;
     }
 
-    public DynamicImagesPage getDynamicImagesPage() {
-		return dynamicImagesPage;
+    	
+	/**
+	 * Taken for compatibility, please use extraPages.
+	 * @deprecated
+	 * @return
+	 */
+	public DynamicImagesPage getDynamicImagesPage() {
+		return dynamicImagesPage;		
 	}
 
+	/**
+	 * Taken for compatibility, please use extraPages.
+	 * @deprecated
+	 * @return
+	 */
 	public void setDynamicImagesPage(DynamicImagesPage dynamicImagesPage) {
 		this.dynamicImagesPage = dynamicImagesPage;
 	}

@@ -37,6 +37,12 @@ import com.lowagie.text.Rectangle;
  * Holds the config of a page and knows how to print it.
  */
 public class Page {
+	
+	public static enum Position {
+		NONE, MAIN_PAGE, TITLE_PAGE, LAST_PAGE
+				
+	}
+	
     protected List<Block> items;
     private String pageSize = "A4";
     private HeaderFooter header = null;
@@ -66,7 +72,7 @@ public class Page {
             }
             context.getCustomBlocks().setHeader(header, params);
             context.getCustomBlocks().setFooter(footer, params);
-
+            context.setCurrentPosition(getCurrentPosition());
             for (int i = 0; i < items.size(); i++) {
                 Block block = items.get(i);
                 if (block.isVisible(context, params)) {
@@ -81,7 +87,11 @@ public class Page {
         }
     }
 
-    public Rectangle getPageSizeRect(RenderingContext context, PJsonObject params) {
+    protected Position getCurrentPosition() {
+		return Position.NONE;
+	}
+
+	public Rectangle getPageSizeRect(RenderingContext context, PJsonObject params) {
         final Rectangle result = PageSize.getRectangle(getPageSize(context, params));
         if (landscape) {
             return result.rotate();
