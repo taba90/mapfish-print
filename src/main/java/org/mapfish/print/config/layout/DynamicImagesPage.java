@@ -26,31 +26,19 @@ import org.mapfish.print.utils.PJsonObject;
 
 import com.lowagie.text.DocumentException;
 
+
 /**
  * Bean to configure the dynamic page before between other pages.
  * It's "dynamicImagesPage" in in the layout definition.
  * <p/>
  * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#ServersideConfiguration
  */
-public class DynamicImagesPage extends Page {
+public class DynamicImagesPage extends ExtraPage {
 
-	public static final String AFTER_LAST_PAGE = "afterLastPage";
-	public static final String BEFORE_LAST_PAGE = "beforeLastPage";
-	public static final String BEFORE_MAIN_PAGE = "beforeMainPage";
-	
-	private String renderOn = AFTER_LAST_PAGE;
-
-	public String getRenderOn() {
-		return renderOn;
-	}
-
-	public void setRenderOn(String renderOn) {
-		this.renderOn = renderOn;
-	}
-
-    /**
+	/**
      * Called for each map requested by the client.
      */
+	@Override
     public void render(PJsonObject params, RenderingContext context) throws DocumentException {
         // validate if have images inside
         if (!params.has("imagePages")) {
@@ -62,5 +50,5 @@ public class DynamicImagesPage extends Page {
         	}
         }
     }
-
+	
 }

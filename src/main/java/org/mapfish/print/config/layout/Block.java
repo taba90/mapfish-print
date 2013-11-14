@@ -20,6 +20,7 @@
 package org.mapfish.print.config.layout;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +40,7 @@ public abstract class Block {
     private VerticalAlign vertAlign = null;
     private String backgroundColor = null;
     private String condition = null;
-    protected double spacingAfter = 0.0;
+    protected double spacingAfter = 0.0;    
 
     public Block() {
 
@@ -48,12 +49,14 @@ public abstract class Block {
     /**
      * Called when the block is rendered.
      */
-    public abstract void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException;
+	public abstract void render(PJsonObject params, PdfElement target,
+			RenderingContext context)
+			throws DocumentException;
 
     public MapBlock getMap() {
         return null;
     }
-
+    
     /**
      * Called just after the config has been loaded to check it is valid.
      *
@@ -146,4 +149,8 @@ public abstract class Block {
         }
         return value == 0.0 ? Float.MAX_VALUE : value;
     }
+
+	public boolean hasExtraRendering() {
+		return false;
+	}
 }
