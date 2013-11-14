@@ -28,10 +28,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.mapfish.print.InvalidValueException;
@@ -324,85 +326,17 @@ public class LegendsBlock extends Block {
 		 * @throws DocumentException
 		 */
         private void setOptimumColumns(float maxColumnWidth, boolean reorderInColumns) throws DocumentException {
-        	
-        	if(legendItems.size() == 0 || maxColumns == 1){
+        	int maxColumnsToUse = maxColumns;
+        	if(overflow) {
+        		maxColumnsToUse = Integer.MAX_VALUE;
+        	}
+        	if(legendItems.size() == 0 || maxColumnsToUse == 1){
         		// we can't reorder nothing
         		reorderInColumns = false;
         	}
         	
         	if(reorderInColumns){
-	        	// array to save the actual column height
-	        	float[] columnsHeight = new float[maxColumns > 0  ? maxColumns: legendItems.size()];
-	        	
-	        	// first pass. we're going to save inside targetColumns the column items by column index 
-	        	Map<Integer, ArrayList<LegendItemTable>> targetColumns = new HashMap<Integer, ArrayList<LegendItemTable>>();
-	        	
-	        	float totalHeight = 0f;
-	        	int lastColumnIndex = 0; // last column added index for columnsHeight array
-	        	int columnsSize = 1;
-	            for (int i = 0, len = legendItems.size(); i < len; ++i) {
-	                LegendItemTable legendItem = legendItems.get(i);
-	                /**
-	                 * need the padding set before in createLegend
-	                 * and add it to the optimum absolute widths
-	                 */
-	                computeOptimumLegendItemWidths(legendItem);
-	
-	                float itemHeight = getHeight(legendItem);
-	                totalHeight += itemHeight;
-	                float cellPaddingTop = leftCell.getPaddingTop();
-	                float spacingBefore = legendItem.getSpaceBefore();
-	                
-	                SetOptimumCellColumnsParameters parameters = new SetOptimumCellColumnsParameters(totalHeight, spacingBefore, cellPaddingTop, maxColumnWidth, i, columnsSize);
-	            	Integer columnIndex = getColumnToUse(itemHeight, columnsHeight);
-	            	if(columnIndex > -1 // need a new column
-	            			&& columnIndex <= lastColumnIndex){ // known column
-	            		ArrayList<LegendItemTable> column = targetColumns.get(columnIndex);
-	            		if(column == null){
-	            			column = new ArrayList<LegendItemTable>();
-	            		}
-	            		column.add(legendItem);
-	            		targetColumns.put(columnIndex, column);
-	            		columnsHeight[columnIndex] += itemHeight; // add the height to the column
-	            	}else{
-	            		parameters = computeNewParameters(legendItem, parameters);
-	            		i = parameters.index;
-	            		totalHeight = parameters.totalHeight;
-	            		columnsSize = parameters.columnsSize;
-	            		if(parameters.maxColumnWidth != maxColumnWidth){
-	                        /**
-	                         * clear out the columns height, because the
-	                         * maxColumnWidth has changed!
-	                         */
-	                		maxColumnWidth = parameters.maxColumnWidth;
-	                		// clear optimization parameters, we need to restart in for statement
-	                		columnsHeight = new float[maxColumns > 0  ? maxColumns: legendItems.size()];
-	                		lastColumnIndex = 0;
-	                		targetColumns = new HashMap<Integer, ArrayList<LegendItemTable>>();
-	                		i= -1;
-	            		}else{
-	                		columnsHeight[++lastColumnIndex] += itemHeight; // new column
-	                		ArrayList<LegendItemTable> column = new ArrayList<LegendItemTable>();
-	                		column.add(legendItem);
-	                		targetColumns.put(lastColumnIndex, column);
-	            		}
-	            	}
-	            }
-	            
-	            //now only iterate an add each legend item to the correct column
-	            for(Integer index: targetColumns.keySet()){
-	            	if(index > 0){ //fist column already generated
-	            		column = getDefaultOuterTable(1);
-	            	}
-	            	//column = columns.get(index);
-	            	for(LegendItemTable item: targetColumns.get(index)){
-	            		column.addCell(item);
-	                    column.setHorizontalAlignment(horizontalAlignment);
-	            	}
-	            	if(index > 0){ //fist column already added
-	            		columns.add(column);
-	            	}
-	            }
+	        	reorderColumns(maxColumnWidth);
         	}else{
         		// Don't reorder in columns (old implementation)
                 float totalHeight = 0f;
@@ -432,7 +366,7 @@ public class LegendsBlock extends Block {
                             }
                         }
                         int columnsSize = columns.size();
-                        maxColumnWidth = (maxWidth / (columnsSize > maxColumns ? maxColumns : columnsSize)) -
+                        maxColumnWidth = (maxWidth / (columnsSize > maxColumnsToUse ? maxColumnsToUse : columnsSize)) -
                                 columnPadding[1] - columnPadding[3];
                         if (maxColumnWidth < optimumIconCellWidth +
                                 optimumTextCellWidth) {
@@ -455,6 +389,160 @@ public class LegendsBlock extends Block {
                 column.setHorizontalAlignment(horizontalAlignment);
         	}
 		}
+
+        private void reorderColumns(float maxColumnWidth)
+        		throws DocumentException {
+        	
+        	int maxColumnsToUse = maxColumns;
+        	if(overflow) {
+        		maxColumnsToUse = Integer.MAX_VALUE;
+        	}
+        	
+        	// first, let's calculate heights for each legend item
+        	final Map<LegendItemTable, Float> itemHeights = new HashMap<LegendItemTable, Float>();
+        	for (int i = 0, len = legendItems.size(); i < len; ++i) {
+        		LegendItemTable legendItem = legendItems.get(i);
+        		// is this needed??
+        		computeOptimumLegendItemWidths(legendItem);
+        		
+        		float itemHeight = getHeight(legendItem);
+        		itemHeights.put(legendItem, itemHeight);
+        	}
+        	
+        	// then reorder items by descending height
+        	TreeSet<LegendItemTable> orderedItems = new TreeSet<LegendItemTable>(new Comparator<LegendItemTable>() {
+
+				@Override
+				public int compare(LegendItemTable item1, LegendItemTable item2) {					
+					return itemHeights.get(item2).compareTo(itemHeights.get(item1));
+				}
+        		
+        	});
+        	orderedItems.addAll(legendItems);
+        	
+        	int maxFinalColumns = maxColumnsToUse > 0  ? Math.min(maxColumnsToUse, legendItems.size()): legendItems.size();
+        	
+        	List<List<LegendItemTable>> candidateColumns = new ArrayList<List<LegendItemTable>>();
+        	for(int count = 0; count < maxFinalColumns; count++) {
+        		candidateColumns.add(new ArrayList<LegendItemTable>());
+        	}
+        	float[] occupiedSpace = new float[maxFinalColumns];
+        	for(int count = 0; count < maxFinalColumns; count++) {
+        		occupiedSpace[count] = 0.0f;
+        	}
+        	List<LegendItemTable> notFitted = new ArrayList<LegendItemTable>();
+        	// use first fit with descending order alghoritm to allocate items to columns
+        	// (http://en.wikipedia.org/wiki/Bin_packing_problem)
+        	for(LegendItemTable itemTable : orderedItems) {
+        		boolean inserted = false;
+        		for(int count = 0; count < maxFinalColumns; count++) {
+        			float height = occupiedSpace[count];
+        			Float itemHeight = itemHeights.get(itemTable);
+					if(!inserted && (height + itemHeight <= maxHeight)) {
+        				inserted = true;
+        				occupiedSpace[count] += itemHeight;
+        				candidateColumns.get(count).add(itemTable);
+        			}
+        		}
+        		// throw apart not-fitted items for later processing 
+        		if(!inserted) {
+        			notFitted.add(itemTable);
+        		}
+        	}
+        	for(int count = 0; count < maxFinalColumns; count++) {
+        		if(occupiedSpace[count] > 0) {
+        			List<LegendItemTable> items = candidateColumns.get(count);
+        			if(count > 0){ //fist column already generated
+    					column = getDefaultOuterTable(1);
+    				}
+    				//column = columns.get(index);
+    				for(LegendItemTable item: items){
+    					column.addCell(item);
+    			        column.setHorizontalAlignment(horizontalAlignment);
+    				}
+    				if(count > 0){ //fist column already added
+    					columns.add(column);
+    				}
+        		}        		
+        	}
+        	for(LegendItemTable item : notFitted) {
+        		if(itemHeights.get(item) > maxHeight) {
+        			column = getDefaultOuterTable(1);
+        			columns.add(column);
+        		}
+        		column.addCell(item);
+        	}
+        }
+		/*private void reorderColumns(float maxColumnWidth)
+				throws DocumentException {
+			// array to save the actual column height
+			int maxFinalColumns = maxColumns > 0  ? Math.min(maxColumns, legendItems.size()): legendItems.size();
+			float[] columnsHeight = new float[maxFinalColumns];
+			
+			// first pass. we're going to save inside targetColumns the column items by column index 
+			Map<Integer, ArrayList<LegendItemTable>> targetColumns = new HashMap<Integer, ArrayList<LegendItemTable>>();
+			
+			float totalHeight = 0f;
+			int lastColumnIndex = 0; // last column added index for columnsHeight array
+			int columnsSize = 1;
+			for (int i = 0, len = legendItems.size(); i < len; ++i) {
+			    LegendItemTable legendItem = legendItems.get(i);
+			    
+			    computeOptimumLegendItemWidths(legendItem);
+
+			    float itemHeight = getHeight(legendItem);
+			    totalHeight += itemHeight;
+			    float cellPaddingTop = leftCell.getPaddingTop();
+			    float spacingBefore = legendItem.getSpaceBefore();
+			    
+			    SetOptimumCellColumnsParameters parameters = new SetOptimumCellColumnsParameters(totalHeight, spacingBefore, cellPaddingTop, maxColumnWidth, i, columnsSize);
+				Integer columnIndex = getColumnToUse(itemHeight, columnsHeight);
+				if(columnIndex > -1 // need a new column
+						&& columnIndex <= lastColumnIndex){ // known column
+					ArrayList<LegendItemTable> column = targetColumns.get(columnIndex);
+					if(column == null){
+						column = new ArrayList<LegendItemTable>();
+					}
+					column.add(legendItem);
+					targetColumns.put(columnIndex, column);
+					columnsHeight[columnIndex] += itemHeight; // add the height to the column
+				}else{
+					parameters = computeNewParameters(legendItem, parameters);
+					i = parameters.index;
+					totalHeight = parameters.totalHeight;
+					columnsSize = parameters.columnsSize;
+					if(parameters.maxColumnWidth != maxColumnWidth){
+			            
+			    		maxColumnWidth = parameters.maxColumnWidth;
+			    		// clear optimization parameters, we need to restart in for statement
+			    		columnsHeight = new float[maxFinalColumns];
+			    		lastColumnIndex = 0;
+			    		targetColumns = new HashMap<Integer, ArrayList<LegendItemTable>>();
+			    		i= -1;
+					}else{
+			    		columnsHeight[++lastColumnIndex] += itemHeight; // new column
+			    		ArrayList<LegendItemTable> column = new ArrayList<LegendItemTable>();
+			    		column.add(legendItem);
+			    		targetColumns.put(lastColumnIndex, column);
+					}
+				}
+			}
+			
+			//now only iterate an add each legend item to the correct column
+			for(Integer index: targetColumns.keySet()){
+				if(index > 0){ //fist column already generated
+					column = getDefaultOuterTable(1);
+				}
+				//column = columns.get(index);
+				for(LegendItemTable item: targetColumns.get(index)){
+					column.addCell(item);
+			        column.setHorizontalAlignment(horizontalAlignment);
+				}
+				if(index > 0){ //fist column already added
+					columns.add(column);
+				}
+			}
+		}*/
 
         /**
          * Obtain the index of the column to add the legend item
