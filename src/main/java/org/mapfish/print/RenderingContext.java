@@ -29,6 +29,7 @@ import java.util.Map;
 import org.mapfish.print.config.Config;
 import org.mapfish.print.config.layout.ExtraPage;
 import org.mapfish.print.config.layout.Layout;
+import org.mapfish.print.config.layout.Page;
 import org.mapfish.print.config.layout.Page.Position;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -51,6 +52,7 @@ public class RenderingContext {
     private final Map<String, String> headers;
     private final List<ExtraPage> extraPages = new ArrayList<ExtraPage>();
     private Position currentPosition = Position.NONE;
+    private Page currentPage = null;
 
     /**
      * Current page being rendered
@@ -163,5 +165,14 @@ public class RenderingContext {
 	public List<ExtraPage> getExtraPages() {
 		return extraPages;
 	}
+	
+	public void setCurrentPage(Page currentPage) {
+		this.currentPage = currentPage;
+	}
+
+	public Page getCurrentPage() {
+		return currentPage;
+	}
+
 	
 }

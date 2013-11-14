@@ -73,6 +73,7 @@ public class Page {
             context.getCustomBlocks().setHeader(header, params);
             context.getCustomBlocks().setFooter(footer, params);
             context.setCurrentPosition(getCurrentPosition());
+            context.setCurrentPage(this);
             for (int i = 0; i < items.size(); i++) {
                 Block block = items.get(i);
                 if (block.isVisible(context, params)) {
@@ -194,5 +195,23 @@ public class Page {
 
         if (header != null) header.validate();
         if (footer != null) footer.validate();
+    }
+    
+    /**
+     * Apply this page format properties (size, margins, etc.) to
+     * another page.
+     * 
+     * @param other
+     */
+    public void applyPageFormat(Page other) {
+    	other.pageSize = pageSize;
+    	other.landscape = landscape;
+    	other.marginBottom = marginBottom;
+    	other.marginTop = marginTop;
+    	other.marginLeft = marginLeft;
+    	other.marginRight = marginRight;
+    	other.backgroundPdf = backgroundPdf;
+    	other.header = header;
+    	other.footer = footer;
     }
 }

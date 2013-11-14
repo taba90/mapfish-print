@@ -237,7 +237,9 @@ public class LegendsBlock extends Block {
             		extraColumns.add(columns.get(count));
             	}
             	columns.removeAll(extraColumns);
-            	context.getExtraPages().add(ExtraPage.createAfter(context.getCurrentPosition(), LegendsBlock.this));
+				context.getExtraPages().add(
+						ExtraPage.createAfter(context.getCurrentPosition(),
+								LegendsBlock.this, context.getCurrentPage()));
             }
             for (PdfPTable col : columns) {            	
                 PdfPCell cell = new PdfPCell(col);
@@ -250,7 +252,7 @@ public class LegendsBlock extends Block {
                 }
                 table.addCell(cell);
             }
-            if(numColumns > maxColumns && numColumns % maxColumns != 0) {
+            if(!overflow && (numColumns > maxColumns && numColumns % maxColumns != 0)) {
             	// add filler columns
             	for(int count = 0; count< (maxColumns - numColumns % maxColumns) ; count++) {
             		PdfPCell cell = new PdfPCell(getDefaultOuterTable(1));            		
@@ -413,8 +415,12 @@ public class LegendsBlock extends Block {
         	TreeSet<LegendItemTable> orderedItems = new TreeSet<LegendItemTable>(new Comparator<LegendItemTable>() {
 
 				@Override
-				public int compare(LegendItemTable item1, LegendItemTable item2) {					
-					return itemHeights.get(item2).compareTo(itemHeights.get(item1));
+				public int compare(LegendItemTable item1, LegendItemTable item2) {
+					int compareResult = itemHeights.get(item2).compareTo(itemHeights.get(item1));
+					if(compareResult == 0) {
+						compareResult = 1;
+					}
+					return compareResult;
 				}
         		
         	});
@@ -467,10 +473,14 @@ public class LegendsBlock extends Block {
         	}
         	for(LegendItemTable item : notFitted) {
         		if(itemHeights.get(item) > maxHeight) {
-        			column = getDefaultOuterTable(1);
+        			column = getDefaultOuterTable(1);        			
+        		}
+        		PdfPCell cell = new PdfPCell(item);
+        		column.addCell(item);
+        		column.setHorizontalAlignment(horizontalAlignment);
+        		if(itemHeights.get(item) > maxHeight) {
         			columns.add(column);
         		}
-        		column.addCell(item);
         	}
         }
 		/*private void reorderColumns(float maxColumnWidth)

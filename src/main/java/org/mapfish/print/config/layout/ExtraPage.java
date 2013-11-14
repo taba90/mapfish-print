@@ -55,8 +55,11 @@ public class ExtraPage extends Page {
 		this.renderOn = renderOn;
 	}
 	
-	public static ExtraPage createAfter(Position position, Block renderBlock) {
+	public static ExtraPage createAfter(Position position, Block renderBlock, Page basePage) {
 		ExtraPage page = new ExtraPage();
+		if(basePage != null) {
+			basePage.applyPageFormat(page);
+		}
 		switch(position) {
 			case MAIN_PAGE:
 				page.setRenderOn(BEFORE_LAST_PAGE);
