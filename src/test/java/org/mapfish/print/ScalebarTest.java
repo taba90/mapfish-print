@@ -20,6 +20,8 @@
 package org.mapfish.print;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.TreeSet;
 
 import org.json.JSONException;
 import org.mapfish.print.config.layout.Block;
@@ -165,6 +167,8 @@ public class ScalebarTest extends PdfTestCase {
         block.setType(Type.BAR_SUB);
         draw(page1, doc, context, block);
 
+        block = createCustomIntervalsBlock();
+        draw(page1, doc, context, block);
 
     }
 
@@ -183,6 +187,14 @@ public class ScalebarTest extends PdfTestCase {
         block.setMaxSize(300);
         block.setType(Type.LINE);
         block.setSpacingAfter(30);
+        return block;
+    }
+    
+    private ScalebarBlock createCustomIntervalsBlock() {
+        ScalebarBlock block;
+        block = createBaseBlock();
+        block.setPreferredIntervals(new TreeSet<Integer>(Arrays.asList(1,2,3,5,10)));
+        block.setPreferredIntervalFractions(new TreeSet<Double>(Arrays.asList(0.2, 0.5)));
         return block;
     }
 
