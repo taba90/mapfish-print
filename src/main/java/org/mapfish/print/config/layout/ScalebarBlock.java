@@ -21,7 +21,10 @@ package org.mapfish.print.config.layout;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.mapfish.print.ChunkDrawer;
 import org.mapfish.print.InvalidJsonValueException;
@@ -74,8 +77,11 @@ public class ScalebarBlock extends FontBlock {
     private String barBgColor = null;
 
     private Double lineWidth = null;
+    
+    private TreeSet<Integer> preferredIntervals = new TreeSet<Integer>(Arrays.asList(1, 2, 5, 10));
 
-
+    private TreeSet<Double> preferredIntervalFractions = new TreeSet<Double>(Arrays.asList(0.0));
+    
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
         final PJsonObject globalParams = context.getGlobalParams();
         final DistanceUnit mapUnits = DistanceUnit.fromString(globalParams.getString("units"));
@@ -221,19 +227,27 @@ public class ScalebarBlock extends FontBlock {
 
         // ok, find first character
         double firstChar = value * factor / pow10;
-
+        
         // right, put it into the correct bracket
-        int barLen;
-        if (firstChar >= 10.0) {
-            barLen = 10;
-        } else if (firstChar >= 5.0) {
-            barLen = 5;
-        } else if (firstChar >= 2.0) {
-            barLen = 2;
-        } else {
-            barLen = 1;
-        }
+        double barLen = this.preferredIntervals.first();
+        boolean foundBarLen = false;
+        Iterator<Integer> intervals = this.preferredIntervals.descendingSet().iterator();
+        while(intervals.hasNext() && !foundBarLen) {
+        	Integer interval = intervals.next();
+        	Iterator<Double> fractions = this.preferredIntervalFractions.descendingSet().iterator();
+        	while(fractions.hasNext() && !foundBarLen) {
+        		Double fraction = fractions.next();
+        		//don't add decimals to largest interval value
+                double testInterval = interval == this.preferredIntervals.last() ?
+                        interval : interval + fraction;
 
+                if(firstChar >= testInterval && !foundBarLen){
+                    barLen = testInterval;
+                    foundBarLen = true;
+                }
+        	}
+        }
+        
         // scale it up the correct power of 10
         return barLen * pow10 / factor;
     }
@@ -288,6 +302,14 @@ public class ScalebarBlock extends FontBlock {
 
     public void setLockUnits(boolean lock) {
         this.lockUnits = lock;
+    }
+    
+    public void setPreferredIntervals(TreeSet<Integer> preferredInterval) {
+        this.preferredIntervals = preferredInterval;
+    }
+    
+    public void setPreferredIntervalFractions(TreeSet<Double> preferredIntervalFractions ) {
+        this.preferredIntervalFractions.addAll(preferredIntervalFractions);
     }
 
     public void setBarSize(int barSize) {
