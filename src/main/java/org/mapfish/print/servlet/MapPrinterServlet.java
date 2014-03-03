@@ -50,6 +50,7 @@ import org.mapfish.print.Constants;
 import org.mapfish.print.MapPrinter;
 import org.mapfish.print.output.OutputFormat;
 import org.mapfish.print.output.PdfOutputFactory;
+import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.FileUtilities;
 
@@ -366,7 +367,18 @@ public class MapPrinterServlet extends BaseMapServlet {
         if (httpServletRequest.getHeader("Cookie") != null) {
             headers.put("Cookie", httpServletRequest.getHeader("Cookie"));
         }
-
+        PJsonArray forwarded = specJson.getJSONArray("forwardHeaders");
+        if(forwarded != null) {
+            for(int count = 0; count < forwarded.size(); count++) {
+                String header = forwarded.getString(count);
+                if(header != null && httpServletRequest.getHeader(header) != null) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Forwarding header: " + header);
+                    }
+                    headers.put(header, httpServletRequest.getHeader(header));
+                }
+            }
+        }
         MapPrinter mapPrinter = getMapPrinter(app);
         final OutputFormat outputFormat = mapPrinter.getOutputFormat(specJson);
         //create a temporary file that will contain the PDF
