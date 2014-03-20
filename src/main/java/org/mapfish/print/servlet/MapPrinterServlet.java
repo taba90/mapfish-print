@@ -131,7 +131,7 @@ public class MapPrinterServlet extends BaseMapServlet {
 
     protected void deleteTempFile(File tempFile) {
         deleteFile(tempFile);
-        if(isCluster()) {
+        if(isCluster() && tempFile != null) {
             File specFile = new File(tempFile.getAbsolutePath()+".json");
             if(specFile.exists()) {
                 deleteFile(specFile);
