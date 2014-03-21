@@ -367,7 +367,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         if (httpServletRequest.getHeader("Cookie") != null) {
             headers.put("Cookie", httpServletRequest.getHeader("Cookie"));
         }
-        PJsonArray forwarded = specJson.getJSONArray("forwardHeaders");
+        PJsonArray forwarded = specJson.optJSONArray("forwardHeaders");
         if(forwarded != null) {
             for(int count = 0; count < forwarded.size(); count++) {
                 String header = forwarded.getString(count);
