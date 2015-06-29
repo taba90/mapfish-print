@@ -196,8 +196,10 @@ public class MapPrinterServlet extends BaseMapServlet {
                 doCreateSharedSpec(spec, tempFile);
             }
         } catch (Throwable e) {
-            deleteTempFile(tempFile);
-            error(httpServletResponse, e);
+        	error(httpServletResponse, e);
+        	if(tempFile != null) {
+        		deleteTempFile(tempFile);
+        	}
             return;
         }
 
