@@ -90,5 +90,9 @@ public class ExtraPage extends Page {
     		}
     	}        
     }
+    
+    protected void defaultRender(PJsonObject params, RenderingContext context) throws DocumentException {
+    	super.render(params, context);
+    }
 
 }

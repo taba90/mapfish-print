@@ -43,6 +43,8 @@ public class Layout {
     private MainPage mainPage;
 
     private DynamicImagesPage dynamicImagesPage;
+    
+    private DefaultExtraPage extraPage;
 
 	private LastPage lastPage;
 	
@@ -82,6 +84,9 @@ public class Layout {
 			if (position.equals(extraPage.getRenderOn())) {
 				extraPage.render(params, context);
 			}
+		}
+		if(this.extraPage != null && position.equals(this.extraPage.getRenderOn())) {
+			this.extraPage.render(params, context);
 		}
 		// deprecated: please, use extra pages
 		if(dynamicImagesPage != null) {
@@ -129,8 +134,16 @@ public class Layout {
 	public void setDynamicImagesPage(DynamicImagesPage dynamicImagesPage) {
 		this.dynamicImagesPage = dynamicImagesPage;
 	}
+	
+    public DefaultExtraPage getExtraPage() {
+		return extraPage;
+	}
 
-    public Rectangle getFirstPageSize(RenderingContext context, PJsonObject params) {
+	public void setExtraPage(DefaultExtraPage extraPage) {
+		this.extraPage = extraPage;
+	}
+
+	public Rectangle getFirstPageSize(RenderingContext context, PJsonObject params) {
         if (titlePage != null) {
             return titlePage.getPageSizeRect(context, params);
         } else {
