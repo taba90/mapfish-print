@@ -55,7 +55,7 @@ public class Layout {
             metaData.render(params, context);
         }
 
-        if (titlePage != null) {
+        if (titlePage != null && params.optBool("includeTitlePage", true)) {
             titlePage.render(params, context);
         }
         renderExtraPages(ExtraPage.BEFORE_MAIN_PAGE, params, context);
@@ -68,9 +68,9 @@ public class Layout {
             }
         }
         
-        renderExtraPages(ExtraPage.BEFORE_LAST_PAGE, params, context);
+       	renderExtraPages(ExtraPage.BEFORE_LAST_PAGE, params, context);
 		
-        if (lastPage != null) {
+        if (lastPage != null && params.optBool("includeLastPage", true)) {
             lastPage.render(params, context);
         }
         
@@ -85,7 +85,7 @@ public class Layout {
 				extraPage.render(params, context);
 			}
 		}
-		if(this.extraPage != null && position.equals(this.extraPage.getRenderOn())) {
+		if(this.extraPage != null && position.equals(this.extraPage.getRenderOn()) && params.optBool("includeExtraPage", true)) {
 			this.extraPage.render(params, context);
 		}
 		// deprecated: please, use extra pages
