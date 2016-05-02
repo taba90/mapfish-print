@@ -48,6 +48,7 @@ public class AttributesBlock extends Block {
     
     private String groupBy = null;
     private Block groupTitle = null;
+    private boolean groupsOnNewPage = false;
     
     private String currentGroup = null;
 
@@ -107,7 +108,9 @@ public class AttributesBlock extends Block {
         	
         
         for(List<PJsonObject> data : groups) {
-        	
+        	if(groupsOnNewPage) {
+    			context.getDocument().newPage();
+    		}
         	if(groupTitle != null && data.size() > 0) {
         		groupTitle.render(data.get(0), target, context);
         	}
@@ -194,6 +197,16 @@ public class AttributesBlock extends Block {
 
 	public void setIncludeHeader(boolean includeHeader) {
 		this.includeHeader = includeHeader;
+	}
+
+	
+	
+	public boolean isGroupsOnNewPage() {
+		return groupsOnNewPage;
+	}
+
+	public void setGroupsOnNewPage(boolean groupsOnNewPage) {
+		this.groupsOnNewPage = groupsOnNewPage;
 	}
 
 	@Override
