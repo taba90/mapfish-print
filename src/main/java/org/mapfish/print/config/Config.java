@@ -86,6 +86,7 @@ public class Config implements Closeable {
 
     private boolean tilecacheMerging = false;
     private boolean disableScaleLocking = false;
+    private boolean addForwardedFor = false;
     
     private List<SecurityStrategy> security = Collections.emptyList();
 
@@ -520,4 +521,14 @@ public class Config implements Closeable {
     public String getBrokenUrlPlaceholder() {
         return brokenUrlPlaceholder;
     }
+
+	public boolean isAddForwardedFor() {
+		return addForwardedFor;
+	}
+
+	public void setAddForwardedFor(boolean addForwardedFor) {
+		this.addForwardedFor = addForwardedFor;
+	}
+    
+    
 }
