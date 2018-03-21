@@ -34,6 +34,7 @@ import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfTemplate;
+import com.lowagie.text.pdf.codec.Base64;
 
 import java.awt.Graphics2D;
 import java.io.ByteArrayOutputStream;
@@ -198,6 +199,13 @@ public class PDFUtils {
             }
             path = path.replace("/", File.separator);
             return Image.getInstance(new File(path).toURI().toURL());
+        } else if ("data".equalsIgnoreCase(uri.getScheme())) {
+            String data = uri.toString().substring("data:".length());
+            String base64 = data.split(",")[1];
+            String meta = data.split(",")[0];
+            // String format = meta.split(";")[0];
+            byte[] image = Base64.decode(base64);
+            return Image.getInstance(image);
         } else {
 
             final String contentType;

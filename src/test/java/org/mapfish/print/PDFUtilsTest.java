@@ -19,9 +19,13 @@
 
 package org.mapfish.print;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +33,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.Image;
 
 public class PDFUtilsTest extends PdfTestCase {
     public static final Logger LOGGER = Logger.getLogger(PDFUtilsTest.class);
@@ -67,6 +72,27 @@ public class PDFUtilsTest extends PdfTestCase {
         } catch (IOException ex) {
             //expected
             assertEquals("Didn't receive an image while reading: " + uri, ex.getMessage());
+        }
+    }
+    
+    public void testGetImageBase64() throws URISyntaxException, IOException, DocumentException {
+    	InputStream is = getClass().getResourceAsStream("/data/image.base64");
+    	BufferedReader br = null;
+    	try {
+	        br = new BufferedReader(new InputStreamReader(is));
+	        String line = br.readLine();
+	        URI uri = new URI(line);
+        
+            doc.newPage();
+            Image image = PDFUtils.getImageDirect(context, uri);
+            assertNotNull(image);
+        } catch (IOException ex) {
+            //expected
+            assertEquals("Didn't receive an image while reading Base64 image", ex.getMessage());
+        } finally {
+        	if (br != null) {
+        		br.close();
+        	}
         }
     }
 
