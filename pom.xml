@@ -182,23 +182,45 @@
   <!--     Maven repository is implicit and doesn't need to be specified. -->
   <!-- ================================================================== -->
   <repositories>
-	<repository>
-		<id>geosolutions</id>
-		<name>GeoSolutions Maven Repository</name>
-		<url>http://maven.geo-solutions.it/</url>
-		<snapshots>
-			<enabled>true</enabled>
-		</snapshots>
-	</repository>
-    <repository>
-		<id>osgeo</id>
-		<name>osgeo Maven Repository</name>
-		<url>http://download.osgeo.org/webdav/geotools</url>
-		<snapshots>
-			<enabled>true</enabled>
-		</snapshots>
-	</repository>    
-    
+  <repository>
+   <id>osgeo-releases</id>
+   <name>OSGeo Nexus Release Repository</name>
+   <url>https://repo.osgeo.org/repository/release/</url>
+   <!-- contains release (including third-party-dependences)               -->
+   <!-- Restlet maven Repository (http://maven.restlet.org)                             -->
+   <!-- ucar (https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases) -->
+   <snapshots>
+     <enabled>false</enabled>
+   </snapshots>
+   <releases>
+     <enabled>true</enabled>
+   </releases>
+  </repository>
+
+  <repository>
+   <id>osgeo-snapshots</id>
+   <name>OSGeo Nexus Snapshot Repository</name>
+   <url>https://repo.osgeo.org/repository/snapshot/</url>
+   <!-- contains snapshots               -->
+   <snapshots>
+    <enabled>true</enabled>
+   </snapshots>
+   <releases>
+    <enabled>false</enabled>
+   </releases>
+  </repository>
+   
+   <repository>
+      <id>geosolutions</id>
+      <name>geosolutions repository</name>
+      <url>https://maven.geo-solutions.it/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+     <releases>
+       <enabled>true</enabled>
+     </releases>
+    </repository>    
   </repositories>
   
 </project>
