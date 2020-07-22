@@ -164,18 +164,12 @@
   </build>
 
   <distributionManagement>
-    <repository>
-       <uniqueVersion>false</uniqueVersion>
-       <id>geosolutions</id>
-       <url>ftp://demo.geo-solutions.it</url>
-    </repository>
-    <snapshotRepository>
-        <uniqueVersion>false</uniqueVersion>
-        <name>GeoSolutions Maven Repository</name>
-       <id>geosolutions</id>
-       <url>ftp://demo.geo-solutions.it</url>
-    </snapshotRepository>
+   <repository>
+    <id>geosolutions</id>
+    <url>ftp://maven.geo-solutions.it/</url>
+   </repository>
   </distributionManagement>
+  
 
   <!-- ================================================================== -->
   <!--     Repositories. This is where Maven looks for dependencies. The  -->
