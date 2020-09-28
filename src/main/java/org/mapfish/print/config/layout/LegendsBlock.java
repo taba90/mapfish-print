@@ -368,21 +368,25 @@ public class LegendsBlock extends Block {
                             }
                         }
                         int columnsSize = columns.size();
-                        maxColumnWidth = (maxWidth / (columnsSize > maxColumnsToUse ? maxColumnsToUse : columnsSize)) -
-                                columnPadding[1] - columnPadding[3];
-                        if (maxColumnWidth < optimumIconCellWidth +
-                                optimumTextCellWidth) {
-                            /**
-                             * clear out the table and start new, because the
-                             * maxColumnWidth has changed!
-                             */
-                            column = getDefaultOuterTable(1);
-                            columns = new ArrayList<PdfPTable>(columnsSize);
-                            columns.add(column);
-                            i = -1;
-                            setOptimumCellWidths(maxColumnWidth);
+                        if (maxColumns > 1) {
+	                        maxColumnWidth = (maxWidth / (columnsSize > maxColumnsToUse ? maxColumnsToUse : columnsSize)) -
+	                                columnPadding[1] - columnPadding[3];
+	                        if (maxColumnWidth < optimumIconCellWidth +
+	                                optimumTextCellWidth) {
+	                            /**
+	                             * clear out the table and start new, because the
+	                             * maxColumnWidth has changed!
+	                             */
+	                            column = getDefaultOuterTable(1);
+	                            columns = new ArrayList<PdfPTable>(columnsSize);
+	                            columns.add(column);
+	                            i = -1;
+	                            setOptimumCellWidths(maxColumnWidth);
+	                        } else {
+	                            column.addCell(legendItem);
+	                        }
                         } else {
-                            column.addCell(legendItem);
+                        	column.addCell(legendItem);
                         }
                     } else {
                         column.addCell(legendItem);
