@@ -8,7 +8,7 @@ mvn install
 
 mvn deploy
 
-The following command will build and upload all artifacts to the maven.geo-solutions.it repository.
+The command will build and upload all artifacts to the maven.geo-solutions.it repository.
 
 
 
