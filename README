@@ -1,3 +1,19 @@
+This fork uses maven to build and deploy instead of gradle
+
+== build ==
+mvn install
+
+== Deploy ==
+- Execute the following command():
+
+mvn deploy
+
+The following command will build and upload all artifacts to the maven.geo-solutions.it repository.
+
+
+
+Here the old readme
+===========================================================
 Please read the documentation available here:
 http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleDoc
 
