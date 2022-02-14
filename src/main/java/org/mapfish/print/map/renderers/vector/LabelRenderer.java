@@ -53,6 +53,7 @@ public class LabelRenderer {
 			String labelAlign = style.optString("labelAlign", "cm");
 			float labelXOffset = style.optFloat("labelXOffset", (float) 0.0);
 			float labelYOffset = style.optFloat("labelYOffset", (float) 0.0);
+			float labelRotation = style.optFloat("rotation", (float) 0.0);
 			String fontColor = style.optString("fontColor", "#000000");
 			/* Supported itext fonts: COURIER, HELVETICA, TIMES_ROMAN */
 			String fontFamily = style.optString("fontFamily", "HELVETICA");
@@ -76,19 +77,30 @@ public class LabelRenderer {
 					.toLowerCase().replaceAll("px", "")) * f;
 			dc.setFontAndSize(bf, fontHeight);
 			dc.setColorFill(ColorWrapper.convertColor(fontColor));
+			String outlineColor = style.optString("labelOutlineColor", null);
+			float outlineWidth = style.optFloat("labelOutlineWidth", 1);
+			if (outlineColor != null) {
+				dc.setTextRenderingMode(PdfContentByte.TEXT_RENDER_MODE_FILL_STROKE);
+				dc.setColorStroke(ColorWrapper.convertColor(outlineColor));
+				dc.setLineWidth(outlineWidth);
+			}
+			
 			dc.beginText();
 			dc.setTextMatrix((float) center.x + labelXOffset * f,
                 (float) center.y + labelYOffset * f);
+			float offset = PDFUtils
+					.getVerticalOffset(labelAlign, fontHeight);
+			float yOffset = (float)Math.cos(labelRotation * Math.PI / 180.0) * offset;
+			float xOffset = (float)Math.sin(labelRotation * Math.PI / 180.0) * offset;
 			dc.showTextAligned(
 					PDFUtils.getHorizontalAlignment(labelAlign),
 					label,
-					(float) center.x + labelXOffset * f,
+					(float) center.x + labelXOffset * f + xOffset,
 					(float) center.y
 							+ labelYOffset
 							* f
-							- PDFUtils
-									.getVerticalOffset(labelAlign, fontHeight),
-					0);
+							- yOffset,
+				labelRotation);
 			dc.endText();
 		}
 	}
