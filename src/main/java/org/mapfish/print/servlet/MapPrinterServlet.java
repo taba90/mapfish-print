@@ -26,9 +26,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -255,7 +257,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         if(httpServletRequest.getParameter("spec") != null) {
             return httpServletRequest.getParameter("spec");
         }
-        BufferedReader data = httpServletRequest.getReader();
+        BufferedReader data = new BufferedReader(new InputStreamReader(httpServletRequest.getInputStream(), StandardCharsets.UTF_8));
         try {
             StringBuilder spec = new StringBuilder();
             String cur;
