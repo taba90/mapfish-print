@@ -19,8 +19,6 @@
 
 package org.mapfish.print.map.renderers.vector;
 
-import com.itextpdf.awt.geom.AffineTransform;
-import com.itextpdf.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,11 +30,13 @@ import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonObject;
 
+import com.itextpdf.awt.geom.AffineTransform;
+import com.itextpdf.awt.geom.Point2D;
 import com.itextpdf.text.pdf.PdfContentByte;
 
 /**

@@ -19,22 +19,8 @@
 
 package org.mapfish.print;
 
-import java.io.BufferedReader;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -44,9 +30,14 @@ import org.mapfish.print.config.ConfigFactory;
 import org.mapfish.print.config.ConfigTest;
 import org.mapfish.print.utils.PJsonObject;
 
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Image;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class PDFUtilsTest extends PdfTestCase {
     private static final String FIVE_HUNDRED_ROUTE = "/500";
@@ -83,27 +74,6 @@ public class PDFUtilsTest extends PdfTestCase {
         } catch (IOException ex) {
             //expected
             assertEquals("Didn't receive an image while reading: " + uri, ex.getMessage());
-        }
-    }
-    
-    public void testGetImageBase64() throws URISyntaxException, IOException, DocumentException {
-    	InputStream is = getClass().getResourceAsStream("/data/image.base64");
-    	BufferedReader br = null;
-    	try {
-	        br = new BufferedReader(new InputStreamReader(is));
-	        String line = br.readLine();
-	        URI uri = new URI(line);
-        
-            doc.newPage();
-            Image image = PDFUtils.getImageDirect(context, uri);
-            assertNotNull(image);
-        } catch (IOException ex) {
-            //expected
-            assertEquals("Didn't receive an image while reading Base64 image", ex.getMessage());
-        } finally {
-        	if (br != null) {
-        		br.close();
-        	}
         }
     }
 
@@ -149,8 +119,7 @@ public class PDFUtilsTest extends PdfTestCase {
         Font font = new Font();
         context.getLayout().getMainPage().getMap(null).setWidth("300");
         context.getLayout().getMainPage().getMap(null).setHeight("600");
-        PDFUtils.renderString(context, params, "${scaleLbl}1:${format %,d scale}", font, null,
-                false);
+        PDFUtils.renderString(context, params, "${scaleLbl}1:${format %,d scale}", 0, font, null, false);
 
     }
     
@@ -193,13 +162,7 @@ public class PDFUtilsTest extends PdfTestCase {
         context.getLayout().getMainPage().getMap("other").setWidth("300");
         context.getLayout().getMainPage().getMap("other").setHeight("600");
         
-        assertTrue(PDFUtils
-                .renderString(context, params, "${scaleLbl}1:${format %,d scale.main}", font, null,
-                        false)
-                .getContent().contains("1:25"));
-        assertTrue(PDFUtils
-                .renderString(context, params, "${scaleLbl}1:${format %,d scale.other}", font, null,
-                        false)
-                .getContent().contains("1:200"));
+        assertTrue(PDFUtils.renderString(context, params, "${scaleLbl}1:${format %,d scale.main}", 0, font, null, false).getContent().contains("1:25"));
+        assertTrue(PDFUtils.renderString(context, params, "${scaleLbl}1:${format %,d scale.other}", 0, font, null, false).getContent().contains("1:200"));
     }
 }

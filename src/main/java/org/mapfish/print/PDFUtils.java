@@ -19,52 +19,16 @@
 
 package org.mapfish.print;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.batik.bridge.BridgeContext;
-import org.apache.batik.bridge.DocumentLoader;
-import org.apache.batik.bridge.GVTBuilder;
-import org.apache.batik.bridge.UserAgent;
-import org.apache.batik.bridge.UserAgentAdapter;
-import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
-import org.apache.batik.dom.svg.SVGDocumentFactory;
-import org.apache.batik.gvt.GraphicsNode;
-import org.apache.batik.util.XMLResourceDescriptor;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.log4j.Logger;
-import org.mapfish.print.config.layout.Block;
-import org.mapfish.print.config.layout.HorizontalAlign;
-import org.mapfish.print.config.layout.MapBlock;
-import org.mapfish.print.config.layout.ScalebarBlock;
-import org.mapfish.print.config.layout.TableConfig;
-import org.mapfish.print.utils.PJsonObject;
-import org.w3c.dom.svg.SVGDocument;
-
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+
 import com.itextpdf.awt.PdfGraphics2D;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -76,6 +40,43 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.codec.Base64;
+
+import org.apache.batik.bridge.BridgeContext;
+import org.apache.batik.bridge.DocumentLoader;
+import org.apache.batik.bridge.GVTBuilder;
+import org.apache.batik.bridge.UserAgent;
+import org.apache.batik.bridge.UserAgentAdapter;
+import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
+import org.apache.batik.dom.svg.SVGDocumentFactory;
+import java.io.ByteArrayOutputStream;
+import org.apache.batik.gvt.GraphicsNode;
+import java.io.File;
+import org.apache.batik.util.XMLResourceDescriptor;
+import java.io.IOException;
+import org.apache.commons.httpclient.Header;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import org.apache.commons.httpclient.methods.GetMethod;
+import java.text.SimpleDateFormat;
+import org.apache.log4j.Logger;
+import java.util.Date;
+import org.mapfish.print.config.layout.Block;
+import java.util.HashMap;
+import org.mapfish.print.config.layout.HorizontalAlign;
+import java.util.List;
+import org.mapfish.print.config.layout.MapBlock;
+import java.util.Map;
+import org.mapfish.print.config.layout.ScalebarBlock;
+import java.util.regex.Matcher;
+import org.mapfish.print.config.layout.TableConfig;
+import java.util.regex.Pattern;
+import org.mapfish.print.utils.PJsonObject;
+import org.w3c.dom.svg.SVGDocument;
 
 /**
  * Some utility functions for iText.
@@ -221,6 +222,7 @@ public class PDFUtils {
             byte[] image = Base64.decode(base64);
             return Image.getInstance(image);
         } else {
+
             final String contentType;
             final int statusCode;
             final String statusText;
@@ -428,9 +430,7 @@ public class PDFUtils {
 
     private static final Pattern VAR_REGEXP = Pattern.compile("\\$\\{([^}]+)\\}");
 
-    public static Phrase renderString(RenderingContext context, PJsonObject params, String val,
-            com.itextpdf.text.Font font, String mapName, boolean asHTML)
-            throws DocumentException {
+    public static Phrase renderString(RenderingContext context, PJsonObject params, String val, int maxLength, com.itextpdf.text.Font font, String mapName, boolean asHTML) throws DocumentException {
         Phrase result = new Phrase();
         while (true) {
             Matcher matcher = VAR_REGEXP.matcher(val);
@@ -707,22 +707,12 @@ public class PDFUtils {
         return image;
     }
 
-    public static BaseFont getBaseFont(String fontFamily, String fontSize,
-            String fontWeight) {
-        Font.FontFamily myFontValue;
-        float myFontSize;
-        int myFontWeight;
-        if (fontFamily.toUpperCase().contains("COURIER")) {
-            myFontValue = Font.FontFamily.COURIER;
-        } else if (fontFamily.toUpperCase().contains("HELVETICA")) {
-            myFontValue = Font.FontFamily.HELVETICA;
-        } else if (fontFamily.toUpperCase().contains("ROMAN")) {
-            myFontValue = Font.FontFamily.TIMES_ROMAN;
-        } else {
-            myFontValue = Font.FontFamily.HELVETICA;
-        }
-        myFontSize = (float) Double.parseDouble(fontSize.toLowerCase()
+    public static BaseFont getBaseFont(String font, String fontEncoding, String fontFamily,
+    		String fontSize, String fontWeight) {
+        float myFontSize = (float) Double.parseDouble(fontSize.toLowerCase()
                 .replaceAll("px", ""));
+        
+        int myFontWeight;
         if (fontWeight.toUpperCase().contains("NORMAL")) {
             myFontWeight = Font.NORMAL;
         } else if (fontWeight.toUpperCase().contains("BOLD")) {
@@ -732,7 +722,24 @@ public class PDFUtils {
         } else {
             myFontWeight = Font.NORMAL;
         }
-        Font pdfFont = new Font(myFontValue, myFontSize, myFontWeight);
+
+    	Font pdfFont;
+    	if (font != null && FontFactory.isRegistered(font)) {
+    		pdfFont = FontFactory.getFont(font, fontEncoding, myFontSize, myFontWeight);
+    	}
+    	else {
+	        Font.FontFamily myFontValue;
+	        if (fontFamily.toUpperCase().contains("COURIER")) {
+	            myFontValue = Font.FontFamily.COURIER;
+	        } else if (fontFamily.toUpperCase().contains("HELVETICA")) {
+	            myFontValue = Font.FontFamily.HELVETICA;
+	        } else if (fontFamily.toUpperCase().contains("ROMAN")) {
+	            myFontValue = Font.FontFamily.TIMES_ROMAN;
+	        } else {
+	            myFontValue = Font.FontFamily.HELVETICA;
+	        }
+	        pdfFont = new Font(myFontValue, myFontSize, myFontWeight);
+    	}
         return pdfFont.getCalculatedBaseFont(false);
     }
 

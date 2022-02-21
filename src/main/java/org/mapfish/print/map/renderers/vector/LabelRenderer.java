@@ -27,11 +27,11 @@ import org.mapfish.print.RenderingContext;
 import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.utils.PJsonObject;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfContentByte;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 
 public class LabelRenderer {
 
@@ -60,24 +60,29 @@ public class LabelRenderer {
 			String fontColor = style.optString("fontColor", "#000000");
 			/* Supported itext fonts: COURIER, HELVETICA, TIMES_ROMAN */
 			String fontFamily = style.optString("fontFamily", "HELVETICA");
-			if (!"COURIER".equalsIgnoreCase(fontFamily)
-					|| !"HELVETICA".equalsIgnoreCase(fontFamily)
-					|| !"TIMES_ROMAN".equalsIgnoreCase(fontFamily)) {
+			String font = style.optString("font");
+            String fontEncoding = style.optString("fontEncoding");
+            if (font != null && !FontFactory.isRegistered(font)) {
+                LOGGER.info("Font: '" + font +
+                		"' not registered, one of the supported fonts from 'fontFamily' will be used");            	
+            }
+            else if (!"COURIER".equalsIgnoreCase(fontFamily)
+                    && !"HELVETICA".equalsIgnoreCase(fontFamily)
+                    && !"TIMES_ROMAN".equalsIgnoreCase(fontFamily)) {
 
-                LOGGER.info("Font: '"+ fontFamily +
-                        "' not supported, supported fonts are 'HELVETICA', " +
+                LOGGER.info("Font family: '" + fontFamily +
+                        "' not supported, supported ones are 'HELVETICA', " +
                         "'COURIER', 'TIMES_ROMAN', defaults to 'HELVETICA'");
                 fontFamily = "HELVETICA";
             }
             
-            String[] labels = label.split("\n");
             String fontSize = style.optString("fontSize", "12");
             String fontWeight = style.optString("fontWeight", "normal");
             Coordinate center = geometry.getCentroid().getCoordinate();
             center = GeometriesRenderer.transformCoordinate(center, affineTransform);
 			float f = context.getStyleFactor();
 			BaseFont bf = PDFUtils
-					.getBaseFont(fontFamily, fontSize, fontWeight);
+					.getBaseFont(font, fontEncoding, fontFamily, fontSize, fontWeight);
 			float fontHeight = (float) Double.parseDouble(fontSize
 					.toLowerCase().replaceAll("px", "")) * f;
 			dc.setFontAndSize(bf, fontHeight);
