@@ -19,15 +19,11 @@
 
 package org.mapfish.print.map.renderers.vector;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
+import com.itextpdf.awt.geom.AffineTransform;
+import com.itextpdf.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mapfish.print.RenderingContext;
-import org.mapfish.print.utils.PJsonObject;
-
-import com.lowagie.text.pdf.PdfContentByte;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -36,8 +32,12 @@ import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.Point;
+import org.mapfish.print.RenderingContext;
+import org.mapfish.print.utils.PJsonObject;
+
+import com.itextpdf.text.pdf.PdfContentByte;
 
 /**
  * iText renderer for JTS geometries.
@@ -60,13 +60,18 @@ public abstract class GeometriesRenderer<T extends Geometry> {
     @SuppressWarnings({"unchecked"})
     protected static void render(RenderingContext context, PdfContentByte dc, PJsonObject style, Geometry geometry, AffineTransform affineTransform) {
         @SuppressWarnings("rawtypes")
-		GeometriesRenderer renderer = RENDERERS.get(geometry.getClass());
+        GeometriesRenderer renderer = RENDERERS.get(geometry.getClass());
         if (renderer == null) {
             throw new RuntimeException("Rendering of " + geometry.getClass().getName() + " not supported");
         }
         dc.saveState();
         try {
             renderer.renderImpl(context, dc, style, geometry, affineTransform);
+        } finally {
+            dc.restoreState();
+        }
+        dc.saveState();
+        try {
             LabelRenderer.applyStyle(context, dc, style, geometry, affineTransform);
         } finally {
             dc.restoreState();
@@ -84,9 +89,9 @@ public abstract class GeometriesRenderer<T extends Geometry> {
     }
 
     protected static Coordinate transformCoordinate(Coordinate coordinate, AffineTransform affineTransform) {
-    	Point2D point2D = new Point2D.Double(coordinate.x, coordinate.y);
-    	affineTransform.transform(point2D, point2D);
-    	coordinate.setCoordinate(new Coordinate(point2D.getX(), point2D.getY()));
-    	return coordinate;
+        Point2D point2D = new Point2D.Double(coordinate.x, coordinate.y);
+        affineTransform.transform(point2D, point2D);
+        coordinate.setCoordinate(new Coordinate(point2D.getX(), point2D.getY()));
+        return coordinate;
     }
 }
