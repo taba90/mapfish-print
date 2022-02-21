@@ -27,7 +27,7 @@
     <dependency>
       <groupId>org.locationtech.jts</groupId>
       <artifactId>jts-core</artifactId>
-      <version>1.16.1</version>
+      <version>1.18.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -93,7 +93,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20080701</version>
+      <version>20180813</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
