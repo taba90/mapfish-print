@@ -183,10 +183,30 @@ public class TMSMapReaderTest extends MapTestBasic {
         h = 256;
         final URI tileUri4 = tmsReader.getTileUri(commonUri, transformer, minGeoX, minGeoY, maxGeoX, maxGeoY, w, h);
         assertEquals("/08/151/90.png", tileUri4.toString().split("layerName")[1]);
+        
+        minGeoX = -100000;
+        minGeoY = 0;
+        maxGeoX = 0;
+        maxGeoY = 100000;
+        w = 256;
+        h = 256;
+        final URI tileUri5 = tmsReader.getTileUri(commonUri, transformer, minGeoX, minGeoY, maxGeoX, maxGeoY, w, h);
+        assertEquals("/03/7/0.png", tileUri5.toString().split("layerName")[1]);
+
+        minGeoX = 800000;
+        minGeoY = 0;
+        maxGeoX = 1000000;
+        maxGeoY = 100000;
+        w = 256;
+        h = 256;
+        final URI tileUri6 = tmsReader.getTileUri(commonUri, transformer, minGeoX, minGeoY, maxGeoX, maxGeoY, w, h);
+        assertEquals("/02/0/0.png", tileUri6.toString().split("layerName")[1]);
 
         System.out.println(tileUri1);
         System.out.println(tileUri2);
         System.out.println(tileUri3);
         System.out.println(tileUri4);
+        System.out.println(tileUri5);
+        System.out.println(tileUri6);
     }
 }

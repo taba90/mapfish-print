@@ -105,7 +105,8 @@ public class TmsMapReader extends TileableMapReader {
         int tileX = (int) Math.round((minGeoX - tileCacheLayerInfo.getMinX()) / (resolution.value * w));
         int tileY = (int) Math.round((minGeoY - tileCacheLayerInfo.getMinY()) / (resolution.value * h));
 
-
+        int[] tileCoords = handleWrapDateLine(tileX, tileY, resolution, 0);
+        
         StringBuilder path = new StringBuilder();
         if (!commonUri.getPath().endsWith("/")) {
             path.append('/');
@@ -114,8 +115,8 @@ public class TmsMapReader extends TileableMapReader {
         path.append(this.serviceVersion);
         path.append('/').append(this.layerName);
         path.append('/').append(String.format("%02d", resolution.index));
-        path.append('/').append(tileX);
-        path.append('/').append(tileY);
+        path.append('/').append(tileCoords[0]);
+        path.append('/').append(tileCoords[1]);
         path.append('.').append(this.format);
 
         return new URI(commonUri.getScheme(), commonUri.getUserInfo(), commonUri.getHost(), commonUri.getPort(),

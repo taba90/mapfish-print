@@ -73,14 +73,16 @@ public class OsmMapReader extends TileableMapReader {
                 .round((minGeoX - tileCacheLayerInfo.getMinX()) / (resolution.value * w));
         int tileY = (int) Math
                 .round((tileCacheLayerInfo.getMaxY() - minGeoY) / (resolution.value * h));
-
+        
+        int[] tileCoords = handleWrapDateLine(tileX, tileY, resolution, -1);
+        
         StringBuilder path = new StringBuilder();
         if (!commonUri.getPath().endsWith("/")) {
             path.append('/');
         }
         path.append(String.format("%d", resolution.index));
-        path.append('/').append(tileX);
-        path.append('/').append(tileY - 1);
+        path.append('/').append(tileCoords[0]);
+        path.append('/').append(tileCoords[1]);
         path.append('.').append(tileCacheLayerInfo.getExtension());
         LOGGER.debug("Printing URI: " + path);
 

@@ -38,7 +38,7 @@ public class OsmLayerInfo extends TileCacheLayerInfo {
         super(resolutions, width, height, minX, minY, maxX, maxY, extension);
     }
 
-    @Override
+    /* @Override
     public ResolutionInfo getNearestResolution(double targetResolution) {
         int pos = resolutions.length - 1;
         double result = resolutions[pos];
@@ -50,5 +50,5 @@ public class OsmLayerInfo extends TileCacheLayerInfo {
             }
         }
         return new ResolutionInfo(pos, result);
-    }
+    }*/
 }
