@@ -1,11 +1,14 @@
 package org.mapfish.print.map.readers;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfWriter;
+import static org.junit.Assert.*;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.mapfish.print.*;
 import org.mapfish.print.config.Config;
@@ -38,27 +41,17 @@ public class XYZLayerTest extends MapTestBasic {
     PJsonObject xyzSpec;
 
 
-    public XYZLayerTest(String name) {
-        super(name);
-    }
-
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
 
-        xyzSpec = MapPrinter.parseSpec(FileUtilities.readWholeTextFile(
-                new File(XYZLayerTest.class.getClassLoader().getResource("layers/layer_spec.json").getFile())
-        ));
-
+        xyzSpec = loadJson("layers/xyz_layer_spec.json");
     }
 
-    protected void tearDown() throws Exception {
-
-        super.tearDown();
-    }
-
+    @Test
     public void testUriWithoutFormat() throws IOException, JSONException, URISyntaxException {
         String test_format = null;
-        String expected_url = xyzSpec.getString("baseURL") + "/07/64/63.gif";
+        String expected_url = xyzSpec.getString("baseURL") + "/7/64/63.gif";
 
         JSONObject xyz_full = xyzSpec.getInternalObj();
         xyz_full.put("path_format", test_format);
@@ -71,6 +64,7 @@ public class XYZLayerTest extends MapTestBasic {
         assertEquals("Default format (null path_format) did not get created correctly", expected_url, outputuri.toURL().toString());
     }
 
+    @Test
     public void testUriWithBasicFormat() throws IOException, JSONException, URISyntaxException {
         String test_format = "${z}_${x}_${y}_static.${extension}";
         String expected_url = xyzSpec.getString("baseURL") + "/7_64_63_static.gif";
@@ -87,6 +81,7 @@ public class XYZLayerTest extends MapTestBasic {
         assertEquals("Custom format without any string formatter did not get created correctly", expected_url, outputuri.toURL().toString());
     }
 
+    @Test
     public void testUriWithDigitFormat() throws IOException, JSONException, URISyntaxException {
         String test_format = "${zzz}_${x}_${yy}_static.${extension}";
         String expected_url = xyzSpec.getString("baseURL") + "/007_64_63_static.gif";

@@ -214,13 +214,13 @@ public class MfGeoJSONWriter {
      * @param env envelope representing bounding box
      */
     protected void encodeBoundingBox(Envelope env) throws JSONException {
-        builder.key("bbox");
-        builder.array();
-        builder.value(env.getMinX());
-        builder.value(env.getMinY());
-        builder.value(env.getMaxX());
-        builder.value(env.getMaxY());
-        builder.endArray();
+    	builder.key("bbox");
+    	builder.array();
+    	builder.value(env.getMinX());
+    	builder.value(env.getMinY());
+    	builder.value(env.getMaxX());
+    	builder.value(env.getMaxY());
+    	builder.endArray();
     }
 
     /**

@@ -19,7 +19,7 @@
 
 package org.mapfish.print.map.renderers.vector;
 
-import java.awt.geom.AffineTransform;
+import com.itextpdf.awt.geom.AffineTransform;
 
 import org.apache.log4j.Logger;
 import org.mapfish.print.PDFUtils;
@@ -27,22 +27,22 @@ import org.mapfish.print.RenderingContext;
 import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.utils.PJsonObject;
 
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.PdfContentByte;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
 
 public class LabelRenderer {
 
-	public static final Logger LOGGER = Logger.getLogger(LabelRenderer.class);
+    public static final Logger LOGGER = Logger.getLogger(LabelRenderer.class);
 
-	static void applyStyle(RenderingContext context, PdfContentByte dc,
-			PJsonObject style, Geometry geometry, AffineTransform affineTransform) {
-		/*
-		 * See Feature/Vector.js for more information about labels
-		 */
-		String label = style.optString("label");
+    static void applyStyle(RenderingContext context, PdfContentByte dc,
+            PJsonObject style, Geometry geometry, AffineTransform affineTransform) {
+        /*
+         * See Feature/Vector.js for more information about labels
+         */
+        String label = style.optString("label");
 
 		if (label != null && label.length() > 0) {
 			/*
@@ -54,25 +54,35 @@ public class LabelRenderer {
 			float labelXOffset = style.optFloat("labelXOffset", (float) 0.0);
 			float labelYOffset = style.optFloat("labelYOffset", (float) 0.0);
 			float labelRotation = style.optFloat("rotation", (float) 0.0);
+			if (labelRotation == 0.0f) {
+				labelRotation = style.optFloat("labelRotation", (float) 0.0);
+			}
 			String fontColor = style.optString("fontColor", "#000000");
 			/* Supported itext fonts: COURIER, HELVETICA, TIMES_ROMAN */
 			String fontFamily = style.optString("fontFamily", "HELVETICA");
-			if (!"COURIER".equalsIgnoreCase(fontFamily)
-					|| !"HELVETICA".equalsIgnoreCase(fontFamily)
-					|| !"TIMES_ROMAN".equalsIgnoreCase(fontFamily)) {
+			String font = style.optString("font");
+            String fontEncoding = style.optString("fontEncoding");
+            if (font != null && !FontFactory.isRegistered(font)) {
+                LOGGER.info("Font: '" + font +
+                		"' not registered, one of the supported fonts from 'fontFamily' will be used");            	
+            }
+            else if (!"COURIER".equalsIgnoreCase(fontFamily)
+                    && !"HELVETICA".equalsIgnoreCase(fontFamily)
+                    && !"TIMES_ROMAN".equalsIgnoreCase(fontFamily)) {
 
-				LOGGER.info("Font: '"+ fontFamily +
-						"' not supported, supported fonts are 'HELVETICA', " +
-						"'COURIER', 'TIMES_ROMAN', defaults to 'HELVETICA'");
-				fontFamily = "HELVETICA";
-			}
-			String fontSize = style.optString("fontSize", "12");
-			String fontWeight = style.optString("fontWeight", "normal");
-			Coordinate center = geometry.getCentroid().getCoordinate();
+                LOGGER.info("Font family: '" + fontFamily +
+                        "' not supported, supported ones are 'HELVETICA', " +
+                        "'COURIER', 'TIMES_ROMAN', defaults to 'HELVETICA'");
+                fontFamily = "HELVETICA";
+            }
+            
+            String fontSize = style.optString("fontSize", "12");
+            String fontWeight = style.optString("fontWeight", "normal");
+            Coordinate center = geometry.getCentroid().getCoordinate();
             center = GeometriesRenderer.transformCoordinate(center, affineTransform);
 			float f = context.getStyleFactor();
 			BaseFont bf = PDFUtils
-					.getBaseFont(fontFamily, fontSize, fontWeight);
+					.getBaseFont(font, fontEncoding, fontFamily, fontSize, fontWeight);
 			float fontHeight = (float) Double.parseDouble(fontSize
 					.toLowerCase().replaceAll("px", "")) * f;
 			dc.setFontAndSize(bf, fontHeight);

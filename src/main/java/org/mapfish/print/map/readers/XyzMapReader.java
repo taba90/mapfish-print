@@ -70,31 +70,33 @@ public class XyzMapReader extends TileableMapReader {
         tileCacheLayerInfo = new XyzLayerInfo(params.getJSONArray("resolutions"), tileSize.getInt(0), tileSize.getInt(1), maxExtent.getFloat(0), maxExtent.getFloat(1), maxExtent.getFloat(2), maxExtent.getFloat(3),
                 params.getString("extension"), tileOriginX, tileOriginY);
     }
-
+    @Override
     protected TileRenderer.Format getFormat() {
         return TileRenderer.Format.BITMAP;
     }
-
+    @Override
     protected void addCommonQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first) {
         //not much query params for this protocol...
     }
-
-    protected URI getTileUri(URI commonUri, Transformer transformer, float minGeoX, float minGeoY, float maxGeoX, float maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException {
-        float targetResolution = (maxGeoX - minGeoX) / w;
+    @Override
+    protected URI getTileUri(URI commonUri, Transformer transformer, double minGeoX, double minGeoY, double maxGeoX, double maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException {
+        double targetResolution = (maxGeoX - minGeoX) / w;
         XyzLayerInfo.ResolutionInfo resolution = tileCacheLayerInfo.getNearestResolution(targetResolution);
 
-        int tileX = Math.round((minGeoX - tileCacheLayerInfo.getMinX()) / (resolution.value * w));
-        int tileY = Math.round((tileCacheLayerInfo.getMaxY() - minGeoY) / (resolution.value * h));
+        int tileX = (int) Math.round((minGeoX - tileCacheLayerInfo.getMinX()) / (resolution.value * w));
+        int tileY = (int) Math.round((tileCacheLayerInfo.getMaxY() - minGeoY) / (resolution.value * h));
 
+        int[] tileCoords = handleWrapDateLine(tileX, tileY, resolution, -1);
+        
         StringBuilder path = new StringBuilder();
         if (!commonUri.getPath().endsWith("/")) {
             path.append('/');
         }
 
         if (this.path_format == null) {
-            path.append(String.format("%02d", resolution.index));
-            path.append('/').append(tileX);
-            path.append('/').append(tileY - 1);
+            path.append(String.format("%d", resolution.index));
+            path.append('/').append(tileCoords[0]);
+            path.append('/').append(tileCoords[1]);
             path.append('.').append(tileCacheLayerInfo.getExtension());
         } else {
             if (this.path_format.startsWith("/")) {
@@ -104,23 +106,23 @@ public class XyzMapReader extends TileableMapReader {
             }
 
              url_regex_replace("z", path, resolution.index);
-             url_regex_replace("x", path, new Integer(tileX));
-             url_regex_replace("y", path, new Integer(tileY - 1));
+             url_regex_replace("x", path, new Integer(tileCoords[0]));
+             url_regex_replace("y", path, new Integer(tileCoords[1]));
              url_regex_replace("extension", path, tileCacheLayerInfo.getExtension());
         }
 
         return new URI(commonUri.getScheme(), commonUri.getUserInfo(), commonUri.getHost(), commonUri.getPort(), commonUri.getPath() + path, commonUri.getQuery(), commonUri.getFragment());
     }
 
-
+    @Override
     public boolean testMerge(MapReader other) {
         return false;
     }
-
+    @Override
     public boolean canMerge(MapReader other) {
         return false;
     }
-
+    @Override
     public String toString() {
         return layer;
     }

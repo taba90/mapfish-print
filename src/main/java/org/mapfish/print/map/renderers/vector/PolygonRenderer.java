@@ -19,17 +19,16 @@
 
 package org.mapfish.print.map.renderers.vector;
 
-import java.awt.geom.AffineTransform;
-
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Polygon;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.utils.PJsonObject;
 
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfGState;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Polygon;
+import com.itextpdf.awt.geom.AffineTransform;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfGState;
 
 class PolygonRenderer extends GeometriesRenderer<Polygon> {
     protected static void applyStyle(RenderingContext context, PdfContentByte dc, PJsonObject style, PdfGState state) {
@@ -70,7 +69,7 @@ class PolygonRenderer extends GeometriesRenderer<Polygon> {
         }
         dc.closePath();
     }
-    
+
     private void renderStrokeAndFill(PdfContentByte dc, boolean stroke, boolean fill) {
         if (stroke && fill) dc.eoFillStroke();
         else if (stroke) dc.stroke();

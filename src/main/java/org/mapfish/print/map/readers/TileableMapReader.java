@@ -25,10 +25,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
 import org.mapfish.print.map.ParallelMapTileLoader;
+import org.mapfish.print.map.readers.TileCacheLayerInfo.ResolutionInfo;
 import org.mapfish.print.map.renderers.TileRenderer;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -40,22 +42,26 @@ public abstract class TileableMapReader extends HTTPMapReader {
         super(context, params);
     }
 
-    protected void renderTiles(TileRenderer formater, Transformer transformer, URI commonUri, ParallelMapTileLoader parallelMapTileLoader) throws IOException, URISyntaxException {
+    protected void renderTiles(TileRenderer formatter, Transformer transformer, URI commonUri, ParallelMapTileLoader parallelMapTileLoader) throws IOException, URISyntaxException {
         final List<URI> urls = new ArrayList<URI>(1);
-        final float offsetX;
-        final float offsetY;
+        final double offsetX;
+        final double offsetY;
         final long bitmapTileW;
         final long bitmapTileH;
         int nbTilesW = 0;
 
-        float minGeoX = transformer.getRotatedMinGeoX();
-        float minGeoY = transformer.getRotatedMinGeoY();
-        float maxGeoX = transformer.getRotatedMaxGeoX();
-        float maxGeoY = transformer.getRotatedMaxGeoY();
+        double minGeoX = transformer.getRotatedMinGeoX();
+        double minGeoY = transformer.getRotatedMinGeoY();
+        double maxGeoX = transformer.getRotatedMaxGeoX();
+        double maxGeoY = transformer.getRotatedMaxGeoY();
 
         if (tileCacheLayerInfo != null) {
+            try {
             //tiled
             transformer = fixTiledTransformer(transformer);
+            } catch (CloneNotSupportedException ex) {
+                Logger.getLogger(TileableMapReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             if (transformer == null) {
                 if (LOGGER.isDebugEnabled()) {
@@ -66,8 +72,8 @@ public abstract class TileableMapReader extends HTTPMapReader {
 
             bitmapTileW = tileCacheLayerInfo.getWidth();
             bitmapTileH = tileCacheLayerInfo.getHeight();
-            final float tileGeoWidth = transformer.getResolution() * bitmapTileW;
-            final float tileGeoHeight = transformer.getResolution() * bitmapTileH;
+            final double tileGeoWidth = transformer.getResolution() * bitmapTileW;
+            final double tileGeoHeight = transformer.getResolution() * bitmapTileH;
 
 
             // TODO I would like to do this sort of thing by extension points for plugins
@@ -96,18 +102,19 @@ public abstract class TileableMapReader extends HTTPMapReader {
 
             offsetX = (minGeoX - tileMinGeoX) / transformer.getResolution();
             offsetY = (minGeoY - tileMinGeoY) / transformer.getResolution();
-            for (float geoY = tileMinGeoY; geoY < maxGeoY; geoY += tileGeoHeight) {
+            for (float geoY = tileMinGeoY; geoY <= maxGeoY; geoY += tileGeoHeight) {
                 nbTilesW = 0;
-                for (float geoX = tileMinGeoX; geoX < maxGeoX; geoX += tileGeoWidth) {
+                for (float geoX = tileMinGeoX; geoX <= maxGeoX; geoX += tileGeoWidth) {
                     nbTilesW++;
-                    if (tileCacheLayerInfo.isVisible(geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight)) {
+                    urls.add(getTileUri(commonUri, transformer, geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight, bitmapTileW, bitmapTileH));
+                    /* if (tileCacheLayerInfo.isVisible(geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight)) {
                         urls.add(getTileUri(commonUri, transformer, geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight, bitmapTileW, bitmapTileH));
                     } else {
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("Tile out of bounds: " + getTileUri(commonUri, transformer, geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight, bitmapTileW, bitmapTileH));
                         }
                         urls.add(null);
-                    }
+                    }*/
                 }
             }
 
@@ -120,20 +127,30 @@ public abstract class TileableMapReader extends HTTPMapReader {
             bitmapTileH = transformer.getRotatedBitmapH();
             urls.add(getTileUri(commonUri, transformer, minGeoX, minGeoY, maxGeoX, maxGeoY, bitmapTileW, bitmapTileH));
         }
-        formater.render(transformer, urls, parallelMapTileLoader, context, opacity, nbTilesW, offsetX, offsetY, bitmapTileW, bitmapTileH);
+        formatter.render(transformer, urls, parallelMapTileLoader, context, opacity, nbTilesW, offsetX, offsetY, bitmapTileW, bitmapTileH);
     }
 
     /**
      * fix the resolution to something compatible with the resolutions available in tilecache.
      */
-    private Transformer fixTiledTransformer(Transformer transformer) {
-        float resolution;
+    private Transformer fixTiledTransformer(Transformer transformer) throws CloneNotSupportedException {
+        double resolution = Double.NaN;
 
         // if clientResolution is passed from client use it explicitly if available otherwise calculate nearest resolution
-        if (this.context.getCurrentPageParams().has("clientResolution")) {
+        /*
+         * if (this.context.getCurrentPageParams().getInternalObj() != null && this.context.getCurrentPageParams().getInternalObj().has("scale")) {
+         * try { // double scale = this.context.getCurrentPageParams().getInternalObj() .getDouble("scale"); double scale = transformer.getScale();
+         * double targetResolution = ((this.tileCacheLayerInfo.getMaxY() - this.tileCacheLayerInfo.getMinY()) / (scale *
+         * this.tileCacheLayerInfo.getWidth())); TileCacheLayerInfo.ResolutionInfo resolutionInfo = tileCacheLayerInfo
+         * .getNearestResolution(targetResolution); resolution = resolutionInfo.value; } catch (Exception e) { if (LOGGER.isDebugEnabled()) {
+         * LOGGER.debug(e.getMessage(), e); } } }
+         */
+
+        if (Double.isNaN(resolution)
+                && this.context.getCurrentPageParams().has("clientResolution")) {
             float clientResolution = this.context.getCurrentPageParams().getFloat("clientResolution");
             boolean hasServerResolution = false;
-            for (float serverResolution : this.tileCacheLayerInfo.getResolutions()) {
+            for (double serverResolution : this.tileCacheLayerInfo.getResolutions()) {
                 if (serverResolution == clientResolution) {
                     hasServerResolution = true;
                 }
@@ -145,8 +162,9 @@ public abstract class TileableMapReader extends HTTPMapReader {
                 resolution = clientResolution;
             }
         }
-        else {
-            float targetResolution = transformer.getGeoW() / transformer.getStraightBitmapW();
+
+        if (Double.isNaN(resolution)) {
+            double targetResolution = transformer.getGeoW() / transformer.getStraightBitmapW();
             TileCacheLayerInfo.ResolutionInfo resolutionInfo = tileCacheLayerInfo.getNearestResolution(targetResolution);
             resolution = resolutionInfo.value;
         }
@@ -156,8 +174,17 @@ public abstract class TileableMapReader extends HTTPMapReader {
         return transformer;
     }
 
+    protected int[] handleWrapDateLine(int tileX, int tileY, ResolutionInfo resolution,
+            int offsetY) {
+        if (tileX < 0)
+            tileX = (int) Math.pow(2, resolution.index) + tileX;
+
+        tileX = (int) Math.round(tileX % Math.pow(2, resolution.index));
+        return new int[] {tileX, tileY + offsetY};
+    }
+    
     /**
      * Adds the query parameters for the given tile.
      */
-    protected abstract URI getTileUri(URI commonUri, Transformer transformer, float minGeoX, float minGeoY, float maxGeoX, float maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException;
+    protected abstract URI getTileUri(URI commonUri, Transformer transformer, double minGeoX, double minGeoY, double maxGeoX, double maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException;
 }

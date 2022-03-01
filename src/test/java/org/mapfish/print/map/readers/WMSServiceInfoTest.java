@@ -19,6 +19,7 @@
 
 package org.mapfish.print.map.readers;
 
+import static org.junit.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,14 +27,13 @@ import java.util.Arrays;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.junit.Test;
 import org.mapfish.print.PrintTestCase;
 import org.xml.sax.SAXException;
 
-public class WMSServerInfoTest extends PrintTestCase {
-    public WMSServerInfoTest(String name) {
-        super(name);
-    }
+public class WMSServiceInfoTest extends PrintTestCase {
 
+    @Test
     public void testParseTileCache() throws IOException, SAXException, ParserConfigurationException {
         String response = "<?xml version='1.0' encoding=\"ISO-8859-1\" standalone=\"no\" ?>\n" +
                 "        <!DOCTYPE WMT_MS_Capabilities SYSTEM \n" +
@@ -112,23 +112,23 @@ public class WMSServerInfoTest extends PrintTestCase {
                 "        </WMT_MS_Capabilities>";
 
         InputStream stream = new ByteArrayInputStream(response.getBytes("ISO-8859-1"));
-        WMSServerInfo info = WMSServerInfo.parseCapabilities(stream);
+        WMSServiceInfo info = new WMSServiceInfo.WMSServiceInfoLoader().parseInfo(stream);
         assertEquals(true, info.isTileCache());
         TileCacheLayerInfo layerInfo = info.getTileCacheLayer("cn");
         assertNotNull(layerInfo);
         assertEquals(256, layerInfo.getWidth());
         assertEquals(256, layerInfo.getHeight());
-        final float[] resolutions = layerInfo.getResolutions();
-        final float[] expectedResolutions = {
-                800.0F,
-                400.0F,
-                200.0F,
-                100.0F,
-                50.0F,
-                20.0F,
-                10.0F,
-                5.0F,
-                2.5F};
+        final double[] resolutions = layerInfo.getResolutions();
+        final double[] expectedResolutions = {
+                800.0,
+                400.0,
+                200.0,
+                100.0,
+                50.0,
+                20.0,
+                10.0,
+                5.0,
+                2.5};
         assertTrue(Arrays.equals(expectedResolutions, resolutions));
 
         final TileCacheLayerInfo.ResolutionInfo higherRes = new TileCacheLayerInfo.ResolutionInfo(8, 2.5F);
@@ -142,14 +142,15 @@ public class WMSServerInfoTest extends PrintTestCase {
         assertEquals(midRes, layerInfo.getNearestResolution(5.0F));
         assertEquals(lowerRes, layerInfo.getNearestResolution(1000.0F));
 
-        assertEquals(155000.0F, layerInfo.getMinX());
-        assertEquals(-253050.0F, layerInfo.getMinY());
+        assertEquals(155000.0F, layerInfo.getMinX(), 0.00001);
+        assertEquals(-253050.0F, layerInfo.getMinY(), 0.00001);
         assertEquals("png", layerInfo.getExtension());
     }
 
     /**
      * Tilecache with resolutions not in the correct order.
      */
+    @Test
     public void testParseWeirdTileCache() throws IOException, SAXException, ParserConfigurationException {
         String response = "<?xml version='1.0' encoding=\"ISO-8859-1\" standalone=\"no\" ?>\n" +
                 "        <!DOCTYPE WMT_MS_Capabilities SYSTEM \n" +
@@ -228,23 +229,23 @@ public class WMSServerInfoTest extends PrintTestCase {
                 "        </WMT_MS_Capabilities>";
 
         InputStream stream = new ByteArrayInputStream(response.getBytes("ISO-8859-1"));
-        WMSServerInfo info = WMSServerInfo.parseCapabilities(stream);
+        WMSServiceInfo info = new WMSServiceInfo.WMSServiceInfoLoader().parseInfo(stream);
         assertEquals(true, info.isTileCache());
         TileCacheLayerInfo layerInfo = info.getTileCacheLayer("cn");
         assertNotNull(layerInfo);
         assertEquals(256, layerInfo.getWidth());
         assertEquals(256, layerInfo.getHeight());
-        final float[] resolutions = layerInfo.getResolutions();
-        final float[] expectedResolutions = {
-                800.0F,
-                400.0F,
-                200.0F,
-                100.0F,
-                50.0F,
-                20.0F,
-                10.0F,
-                5.0F,
-                2.5F};
+        final double[] resolutions = layerInfo.getResolutions();
+        final double[] expectedResolutions = {
+                800.0,
+                400.0,
+                200.0,
+                100.0,
+                50.0,
+                20.0,
+                10.0,
+                5.0,
+                2.5};
         assertTrue(Arrays.equals(expectedResolutions, resolutions));
 
         final TileCacheLayerInfo.ResolutionInfo higherRes = new TileCacheLayerInfo.ResolutionInfo(8, 2.5F);
@@ -258,11 +259,12 @@ public class WMSServerInfoTest extends PrintTestCase {
         assertEquals(midRes, layerInfo.getNearestResolution(5.0F));
         assertEquals(lowerRes, layerInfo.getNearestResolution(1000.0F));
 
-        assertEquals(155000.0F, layerInfo.getMinX());
-        assertEquals(-253050.0F, layerInfo.getMinY());
+        assertEquals(155000.0F, layerInfo.getMinX(), 0.00001);
+        assertEquals(-253050.0F, layerInfo.getMinY(), 0.00001);
         assertEquals("png", layerInfo.getExtension());
     }
 
+    @Test
     public void testParseMapServer() throws IOException, SAXException, ParserConfigurationException {
         String response = "<?xml version='1.0' encoding=\"UTF-8\" standalone=\"no\" ?>\n" +
                 "<!DOCTYPE WMT_MS_Capabilities SYSTEM \"http://schemas.opengis.net/wms/1.1.1/WMS_MS_Capabilities.dtd\"\n" +
@@ -380,10 +382,11 @@ public class WMSServerInfoTest extends PrintTestCase {
                 "</WMT_MS_Capabilities>";
 
         InputStream stream = new ByteArrayInputStream(response.getBytes("UTF-8"));
-        WMSServerInfo info = WMSServerInfo.parseCapabilities(stream);
+        WMSServiceInfo info = new WMSServiceInfo.WMSServiceInfoLoader().parseInfo(stream);
         assertEquals(false, info.isTileCache());
     }
 
+    @Test
     public void testParseGeoServer() throws IOException, SAXException, ParserConfigurationException {
         String response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<!DOCTYPE WMT_MS_Capabilities SYSTEM \"http://wms.example.com:8080/geoserver/schemas/wms/1.1.1/WMS_MS_Capabilities.dtd\">\n" +
@@ -753,7 +756,7 @@ public class WMSServerInfoTest extends PrintTestCase {
                 "</WMT_MS_Capabilities>";
 
         InputStream stream = new ByteArrayInputStream(response.getBytes("UTF-8"));
-        WMSServerInfo info = WMSServerInfo.parseCapabilities(stream);
+        WMSServiceInfo info = new WMSServiceInfo.WMSServiceInfoLoader().parseInfo(stream);
         assertEquals(false, info.isTileCache());
     }
 }
