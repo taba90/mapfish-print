@@ -26,13 +26,14 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Allows to check that a given URL matches an IP address (numeric format)
  */
 public abstract class InetHostMatcher extends HostMatcher {
-    public static final Logger LOGGER = Logger.getLogger(InetHostMatcher.class);
+    public static final Logger LOGGER = LogManager.getLogger(InetHostMatcher.class);
 
     protected byte[][] authorizedIPs = null;
 

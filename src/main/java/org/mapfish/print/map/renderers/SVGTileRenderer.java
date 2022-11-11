@@ -41,7 +41,8 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.batik.ext.awt.RenderingHintsKeyExt;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.print.PrintTranscoder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -58,7 +59,7 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfGState;
 
 public class SVGTileRenderer extends TileRenderer {
-    public static final Logger LOGGER = Logger.getLogger(SVGTileRenderer.class);
+    public static final Logger LOGGER = LogManager.getLogger(SVGTileRenderer.class);
 
     private static Document svgZoomOut;
 

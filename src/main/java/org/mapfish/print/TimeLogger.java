@@ -19,16 +19,14 @@
 
 package org.mapfish.print;
 
-import static org.apache.log4j.Priority.DEBUG_INT;
-import static org.apache.log4j.Priority.ERROR_INT;
-import static org.apache.log4j.Priority.FATAL_INT;
-import static org.apache.log4j.Priority.INFO_INT;
-import static org.apache.log4j.Priority.WARN_INT;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.spi.StandardLevel;
 
 /**
  * User: jeichar
@@ -39,7 +37,7 @@ public class TimeLogger {
     public static final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
 
     private final Logger logger;
-    private final int level;
+    private final Level level;
     private final String task;
     private long start;
 
@@ -49,7 +47,7 @@ public class TimeLogger {
     return sdf.format(cal.getTime());
 
   }
-    private TimeLogger(Logger logger, int level, String task) {
+    private TimeLogger(Logger logger, Level level, String task) {
         this.logger = logger;
         this.level = level;
         this.task = task;
@@ -58,25 +56,17 @@ public class TimeLogger {
     }
 
     private void log(String s) {
-        switch (level) {
-            case DEBUG_INT:
+      if (level.equals(Level.DEBUG))
+
                 logger.debug(s);
-                break;
-            case ERROR_INT:
-                logger.error(s);
-                break;
-            case INFO_INT:
-                logger.info(s);
-                break;
-            case FATAL_INT:
-                logger.fatal(s);
-                break;
-            case WARN_INT:
+      else if (level.equals(Level.ERROR))
+          logger.error(s);
+      else if (level.equals(Level.FATAL))
+          logger.fatal(s);
+      else if (level.equals(Level.WARN))
                 logger.warn(s);
-                break;
-            default:
+      else
                 logger.info(s);
-        }
 
     }
 
@@ -87,9 +77,9 @@ public class TimeLogger {
     }
 
     public static TimeLogger info(Logger logger, String task) {
-        return new TimeLogger(logger, INFO_INT, task);
+        return new TimeLogger(logger, Level.INFO, task);
     }
     public static TimeLogger debug(Logger logger, String task) {
-        return new TimeLogger(logger, DEBUG_INT, task);
+        return new TimeLogger(logger, Level.DEBUG, task);
     }
 }

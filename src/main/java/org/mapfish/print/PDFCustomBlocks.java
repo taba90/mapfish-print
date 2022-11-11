@@ -26,7 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mapfish.print.config.layout.HeaderFooter;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -48,7 +49,7 @@ import com.itextpdf.text.pdf.PdfWriter;
  * custom {@link org.mapfish.print.ChunkDrawer}s, the header/footer and the background.
  */
 public class PDFCustomBlocks extends PdfPageEventHelper {
-    public static final Logger LOGGER = Logger.getLogger(PDFCustomBlocks.class);
+    public static final Logger LOGGER = LogManager.getLogger(PDFCustomBlocks.class);
 
     private ChunkDrawer last = null;
     private final PdfWriter writer;

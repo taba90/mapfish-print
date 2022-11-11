@@ -21,7 +21,8 @@ package org.mapfish.print.output;
 
 import com.itextpdf.text.DocumentException;
 import com.sun.media.jai.codec.FileSeekableStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.rendering.ImageType;
@@ -67,7 +68,7 @@ public class FileCachingJaiMosaicOutputFactory extends InMemoryJaiMosaicOutputFa
 
     public static class ImageOutputScalable extends AbstractImageFormat {
 
-        public static final Logger LOGGER = Logger.getLogger(ImageOutputScalable.class);
+        public static final Logger LOGGER = LogManager.getLogger(ImageOutputScalable.class);
 
         public ImageOutputScalable(String format) {
             super(format);

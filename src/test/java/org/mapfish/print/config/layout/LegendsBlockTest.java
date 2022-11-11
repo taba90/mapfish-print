@@ -6,8 +6,9 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfTemplate;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -39,8 +40,8 @@ public class LegendsBlockTest {
 
     @Before
     public void setUp() throws Exception {
-        Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.INFO);
-        Logger.getLogger("httpclient").setLevel(Level.INFO);
+        Configurator.setLevel(LogManager.getLogger("org.apache.commons.httpclient"), Level.INFO);
+        Configurator.setLevel(LogManager.getLogger("httpclient"),(Level.INFO));
 
         httpd = new FakeHttpd(
                 FakeHttpd.Route.errorResponse("/500", 500, "Server error"),

@@ -21,7 +21,8 @@ package org.mapfish.print.servlet;
 
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.pvalsecc.misc.FileUtilities;
 import org.mapfish.print.utils.PJsonObject;
 import org.mapfish.print.output.OutputFormat;
@@ -62,7 +63,7 @@ import com.itextpdf.text.DocumentException;
  * Main print servlet.
  */
 public class MapPrinterServlet extends BaseMapServlet {
-    public static final Logger SPEC_LOGGER = Logger.getLogger(BaseMapServlet.class.getPackage().toString() + ".spec");
+    public static final Logger SPEC_LOGGER = LogManager.getLogger(BaseMapServlet.class.getPackage().toString() + ".spec");
     private static final long serialVersionUID = -4706371598927161642L;
     private static final String CONTEXT_TEMPDIR = "javax.servlet.context.tempdir";
 

@@ -7,7 +7,15 @@ import com.codahale.metrics.MetricRegistry;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
-import org.apache.log4j.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -26,11 +34,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.*;
 
 public abstract class MapTestBasic {
 
-    protected final Logger logger = Logger.getLogger(MapTestBasic.class);
+    protected final Logger logger = LogManager.getLogger(MapTestBasic.class);
 
     @Rule
     public TestName name = new TestName();
@@ -44,9 +53,21 @@ public abstract class MapTestBasic {
 
         this.threadResources = new ThreadResources();
         this.threadResources.init();
-        BasicConfigurator.configure(new ConsoleAppender(
-                new PatternLayout("%d{HH:mm:ss.SSS} [%t] %-5p %30.30c - %m%n")));
-        Logger.getRootLogger().setLevel(Level.DEBUG);
+
+
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration lconfig = ctx.getConfiguration();
+        PatternLayout.Builder builder=PatternLayout.newBuilder();
+        builder.withPattern("%d{HH:mm:ss.SSS} [%t] %-5p %30.30c - %m%n")
+                .withConfiguration(lconfig)
+                .withCharset(Charset.forName("UTF-8"));
+        final org.apache.logging.log4j.core.Layout layoutLog =builder.build();
+        Appender appender = ConsoleAppender.createDefaultAppenderForLayout(layoutLog);
+        appender.start();
+        lconfig.addAppender(appender);
+        ctx.updateLoggers();
+        Configurator.setLevel(ctx.getRootLogger(), Level.DEBUG);
+
 
         Document doc = new Document(PageSize.A4);
         String baseDir = getBaseDir();
@@ -82,7 +103,7 @@ public abstract class MapTestBasic {
     public void tearDown() throws Exception {
         this.threadResources.destroy();
 
-        BasicConfigurator.resetConfiguration();
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
 
         context.getWriter().close();
 

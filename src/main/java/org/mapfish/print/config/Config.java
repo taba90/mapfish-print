@@ -24,8 +24,10 @@ import com.codahale.metrics.MetricRegistry;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.Constants;
@@ -60,7 +62,7 @@ import java.util.TreeSet;
  * Bean mapping the root of the configuration file.
  */
 public class Config implements Closeable {
-    public static final Logger LOGGER = Logger.getLogger(Config.class);
+    public static final Logger LOGGER = LogManager.getLogger(Config.class);
 
     private Layouts layouts;
     private TreeSet<Integer> dpis;
@@ -359,7 +361,8 @@ public class Config implements Closeable {
 
         // httpclient is a bit pesky about loading everything in memory...
         // disabling the warnings.
-        Logger.getLogger(HttpMethodBase.class).setLevel(Level.ERROR);
+        Logger logger=LogManager.getLogger(HttpMethodBase.class);
+        Configurator.setLevel(logger,Level.ERROR);
 
         // configure proxies for URI
         ProxySelector selector = ProxySelector.getDefault();

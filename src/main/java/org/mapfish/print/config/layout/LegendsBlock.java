@@ -34,7 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
@@ -64,7 +65,7 @@ import com.itextpdf.text.pdf.PdfWriter;
  */
 public class LegendsBlock extends Block {
 
-    public static final Logger LOGGER = Logger.getLogger(LegendsBlock.class);
+    public static final Logger LOGGER = LogManager.getLogger(LegendsBlock.class);
 
     private static String tempDir = System.getProperty("java.io.tmpdir");
 

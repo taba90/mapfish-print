@@ -22,7 +22,8 @@ package org.ho.yaml;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.ho.yaml.exception.PropertyAccessException;
 import org.ho.yaml.wrapper.DefaultBeanWrapper;
 
@@ -31,7 +32,7 @@ import org.ho.yaml.wrapper.DefaultBeanWrapper;
  * See https://sourceforge.net/tracker/index.php?func=detail&aid=1954096&group_id=153924&atid=789717
  */
 public class CustomBeanWrapper extends DefaultBeanWrapper {
-    public static final Logger LOGGER = Logger.getLogger(CustomBeanWrapper.class);
+    public static final Logger LOGGER = LogManager.getLogger(CustomBeanWrapper.class);
 
     public CustomBeanWrapper(Class<?> type) {
         super(type);

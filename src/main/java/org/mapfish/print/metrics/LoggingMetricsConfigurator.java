@@ -20,8 +20,10 @@
 package org.mapfish.print.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.log4j.InstrumentedAppender;
-import org.apache.log4j.LogManager;
+import com.codahale.metrics.log4j2.InstrumentedAppender;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -41,7 +43,10 @@ public class LoggingMetricsConfigurator {
     @PostConstruct
     public final void addMetricsAppenderToLogback() {
         final InstrumentedAppender instrumentedAppender = new InstrumentedAppender(metricRegistry);
-        instrumentedAppender.activateOptions();
-        LogManager.getRootLogger().addAppender(instrumentedAppender);
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration config = ctx.getConfiguration();
+        config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME).addAppender(instrumentedAppender,config.getRootLogger().getLevel(),null);
+        instrumentedAppender.start();
+        ctx.updateLoggers();
     }
 }

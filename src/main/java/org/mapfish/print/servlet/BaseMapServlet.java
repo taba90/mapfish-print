@@ -20,7 +20,8 @@
 package org.mapfish.print.servlet;
 
 import com.google.common.collect.Maps;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mapfish.print.MapPrinter;
 import org.mapfish.print.ShellMapPrinter;
 import org.springframework.context.ApplicationContext;
@@ -41,7 +42,7 @@ import javax.servlet.http.HttpServlet;
 public abstract class BaseMapServlet extends HttpServlet {
     private static final long serialVersionUID = -6342262849725708850L;
 
-    public static final Logger LOGGER = Logger.getLogger(BaseMapServlet.class);
+    public static final Logger LOGGER = LogManager.getLogger(BaseMapServlet.class);
 
     private final Map<String, MapPrinter> printers = Maps.newHashMap();
     private final Map<String,Long> lastModifieds = Maps.newHashMap();

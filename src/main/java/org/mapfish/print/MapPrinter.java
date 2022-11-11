@@ -24,7 +24,8 @@ import com.codahale.metrics.Timer;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.pdf.ByteBuffer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -54,7 +55,7 @@ import javax.annotation.PreDestroy;
  * context object so that all plugins and dependencies are correctly injected into it
  */
 public class MapPrinter {
-    private static final Logger LOGGER = Logger.getLogger(MapPrinter.class);
+    private static final Logger LOGGER = LogManager.getLogger(MapPrinter.class);
     /**
      * The parsed configuration file.
      *

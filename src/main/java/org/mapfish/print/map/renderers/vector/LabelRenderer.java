@@ -21,7 +21,8 @@ package org.mapfish.print.map.renderers.vector;
 
 import com.itextpdf.awt.geom.AffineTransform;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.config.ColorWrapper;
@@ -35,7 +36,7 @@ import org.locationtech.jts.geom.Geometry;
 
 public class LabelRenderer {
 
-    public static final Logger LOGGER = Logger.getLogger(LabelRenderer.class);
+    public static final Logger LOGGER = LogManager.getLogger(LabelRenderer.class);
 
     static void applyStyle(RenderingContext context, PdfContentByte dc,
             PJsonObject style, Geometry geometry, AffineTransform affineTransform) {

@@ -27,13 +27,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.utils.PJsonObject;
@@ -52,7 +56,7 @@ import com.itextpdf.text.DocumentException;
  * from other languages than Java.
  */
 public class ShellMapPrinter {
-    public static final Logger LOGGER = Logger.getLogger(ShellMapPrinter.class);
+    public static final Logger LOGGER = LogManager.getLogger(ShellMapPrinter.class);
 
     public static final String DEFAULT_SPRING_CONTEXT = "mapfish-spring-application-context.xml";
 
@@ -151,9 +155,10 @@ public class ShellMapPrinter {
 
 
 
-    private void configureLogs() {
+    private void configureLogs() throws IOException {
+        URI uri=null;
         if (log4jConfig != null) {
-            PropertyConfigurator.configure(log4jConfig);
+            uri=new File(log4jConfig).toURI();
         } else {
             final ClassLoader classLoader = ShellMapPrinter.class.getClassLoader();
             URL log4jProp;
@@ -175,8 +180,15 @@ public class ShellMapPrinter {
                     break;
             }
 
-            PropertyConfigurator.configure(log4jProp);
+            try {
+                uri=log4jProp.toURI();
+            } catch (URISyntaxException e) {
+                throw new IOException("Cannot load log4j2 properties. Error is: ",e);
+            }
         }
+        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+
+        context.setConfigLocation(uri);
     }
 
     @SuppressWarnings("resource")
