@@ -21,8 +21,10 @@ package org.mapfish.print;
 
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mapfish.print.config.Config;
@@ -47,8 +49,8 @@ public class PDFUtilsTest extends PdfTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.INFO);
-        Logger.getLogger("httpclient").setLevel(Level.INFO);
+        Configurator.setLevel(LogManager.getLogger("org.apache.commons.httpclient"),Level.INFO);
+        Configurator.setLevel(LogManager.getLogger("httpclient"), Level.INFO);
 
         httpd = new FakeHttpd(
                 FakeHttpd.Route.errorResponse(FIVE_HUNDRED_ROUTE, 500, "Server error"),

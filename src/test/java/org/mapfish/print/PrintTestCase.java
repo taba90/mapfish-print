@@ -19,15 +19,22 @@
 
 package org.mapfish.print;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+
+import java.nio.charset.Charset;
 
 public abstract class PrintTestCase {
 
@@ -36,14 +43,21 @@ public abstract class PrintTestCase {
 
     @Before
     public void setUp() throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(
-                new PatternLayout("%d{HH:mm:ss.SSS} [%t] %-5p %30.30c - %m%n")));
-        Logger.getRootLogger().setLevel(Level.DEBUG);
-
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration config = ctx.getConfiguration();
+        PatternLayout.Builder builder=PatternLayout.newBuilder();
+        builder.withPattern("%d{HH:mm:ss.SSS} [%t] %-5p %30.30c - %m%n")
+                .withConfiguration(config);
+        final Layout layout =builder.build();
+        Appender appender = ConsoleAppender.createDefaultAppenderForLayout(layout);
+        appender.start();
+        config.addAppender(appender);
+        ctx.updateLoggers();
+        Configurator.setLevel(ctx.getRootLogger(), Level.DEBUG);
     }
 
     @After
     public void tearDown() throws Exception {
-        BasicConfigurator.resetConfiguration();
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
     }
 }

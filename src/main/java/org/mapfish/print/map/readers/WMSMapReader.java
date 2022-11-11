@@ -19,7 +19,8 @@
 
 package org.mapfish.print.map.readers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
@@ -87,7 +88,7 @@ public class WMSMapReader extends TileableMapReader {
         }
     }
 
-    public static final Logger LOGGER = Logger.getLogger(WMSMapReader.class);
+    public static final Logger LOGGER = LogManager.getLogger(WMSMapReader.class);
     private final String format;
     protected final List<String> layers = new ArrayList<String>();
     private WMSVersion version;

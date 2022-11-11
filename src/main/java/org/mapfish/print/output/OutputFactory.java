@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mapfish.print.config.Config;
 import org.mapfish.print.utils.PJsonObject;
 import org.springframework.beans.factory.annotation.Required;
@@ -36,7 +37,7 @@ import org.springframework.beans.factory.annotation.Required;
  * Time: 2:07:54 PM
  */
 public class OutputFactory {
-    private static final Logger LOGGER = Logger.getLogger(OutputFactory.class);
+    private static final Logger LOGGER = LogManager.getLogger(OutputFactory.class);
     private List<OutputFormatFactory> formatFactories = new ArrayList<OutputFormatFactory>();
 
     /**

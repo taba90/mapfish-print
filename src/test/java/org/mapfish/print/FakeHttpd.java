@@ -22,7 +22,8 @@ package org.mapfish.print;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.pvalsecc.misc.FileUtilities;
 
 import java.io.*;
@@ -87,7 +88,7 @@ public class FakeHttpd {
         }
     }
 
-    public static final Logger LOGGER = Logger.getLogger(FakeHttpd.class);
+    public static final Logger LOGGER = LogManager.getLogger(FakeHttpd.class);
     private final static AtomicInteger portInc = new AtomicInteger(20732);
     private final HttpServer server;
     private int port;

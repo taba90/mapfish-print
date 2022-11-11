@@ -23,7 +23,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
@@ -37,7 +38,7 @@ import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.pdf.PdfReader;
 
 public class PDFTileRenderer extends TileRenderer {
-    public static final Logger LOGGER = Logger.getLogger(PDFTileRenderer.class);
+    public static final Logger LOGGER = LogManager.getLogger(PDFTileRenderer.class);
 
     public void render(final Transformer transformer, List<URI> uris, ParallelMapTileLoader parallelMapTileLoader, final RenderingContext context, final float opacity, int nbTilesHorizontal, double offsetX, double offsetY, long bitmapTileW, long bitmapTileH) throws IOException {
         if (uris.size() != 1) {

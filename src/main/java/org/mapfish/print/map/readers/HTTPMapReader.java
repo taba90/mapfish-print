@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.mapfish.print.InvalidJsonValueException;
@@ -46,7 +47,7 @@ import org.pvalsecc.misc.StringUtils;
 import org.pvalsecc.misc.URIUtils;
 
 public abstract class HTTPMapReader extends MapReader {
-    public static final Logger LOGGER = Logger.getLogger(HTTPMapReader.class);
+    public static final Logger LOGGER = LogManager.getLogger(HTTPMapReader.class);
 
     protected final RenderingContext context;
     protected final PJsonObject params;

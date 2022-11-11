@@ -63,7 +63,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import org.apache.commons.httpclient.methods.GetMethod;
 import java.text.SimpleDateFormat;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.util.Date;
 import org.mapfish.print.config.layout.Block;
 import java.util.HashMap;
@@ -82,7 +83,7 @@ import org.w3c.dom.svg.SVGDocument;
  * Some utility functions for iText.
  */
 public class PDFUtils {
-    public static final Logger LOGGER = Logger.getLogger(PDFUtils.class);
+    public static final Logger LOGGER = LogManager.getLogger(PDFUtils.class);
     private static final Map<String, Image> placeholderCache = new HashMap<String, Image>();
 
     /**

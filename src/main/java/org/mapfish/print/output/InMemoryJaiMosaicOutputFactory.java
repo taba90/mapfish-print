@@ -20,7 +20,8 @@
 package org.mapfish.print.output;
 
 import com.itextpdf.text.DocumentException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.rendering.ImageType;
@@ -87,7 +88,7 @@ public class InMemoryJaiMosaicOutputFactory implements OutputFormatFactory {
 
     public static class ImageOutput extends AbstractImageFormat {
 
-        public static final Logger LOGGER = Logger.getLogger(ImageOutput.class);
+        public static final Logger LOGGER = LogManager.getLogger(ImageOutput.class);
 
         public ImageOutput(String format) {
             super(format);

@@ -23,7 +23,8 @@ import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.RenderingContext;
 import org.json.JSONException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -58,7 +59,7 @@ public class NativeProcessOutputFactory implements OutputFormatFactory {
     /**
      * The logger.
      */
-    public static final Logger LOGGER = Logger.getLogger(NativeProcessOutputFactory.class);
+    public static final Logger LOGGER = LogManager.getLogger(NativeProcessOutputFactory.class);
 	private String cmd;
 	private List<String> cmdArgs = new ArrayList<String>();
 	private List<String> formats = new ArrayList<String>();

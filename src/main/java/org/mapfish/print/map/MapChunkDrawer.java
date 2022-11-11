@@ -179,7 +179,7 @@ public class MapChunkDrawer extends ChunkDrawer {
                         try {
                             pdfLayer = new PdfLayer(reader.toString(), context.getWriter());
                         } catch (IOException ex) {
-                            Logger.getLogger(MapChunkDrawer.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(MapChunkDrawer.class.getName()).log(Level.SEVERE,"", ex);
                         }
                         mapLayer.addChild(pdfLayer);
                         dc.beginLayer(pdfLayer);
